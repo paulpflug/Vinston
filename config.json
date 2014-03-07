@@ -1,3 +1,4 @@
 {
-  "mongoConnection": "mongodb://localhost/Vinston"
+  "mongoConnection": "mongodb://localhost/Vinston",
+  "institutes" : ["Physik","Chemie","Geographie","Mathematik","Informatik"]
 }

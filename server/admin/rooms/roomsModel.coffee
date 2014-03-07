@@ -1,10 +1,11 @@
 mongoose = require('mongoose')
 Schema = mongoose.Schema
-
-RoomSchema = new Schema(
+modelName = "rooms"
+roomSchema = new Schema(
   name: String,
   institute: String,
   secInstitutes: Array
 )
 
-mongoose.model('Room', RoomSchema)
+mongoose.model(modelName, roomSchema)
+module.exports = modelName

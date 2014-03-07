@@ -36,17 +36,25 @@ app.use express.errorHandler()  if "development" is app.get("env")
 server = http.createServer(app)
 server.listen app.get("port"), ->
   console.log "Express server listening on port %d in %s mode", app.get("port"), app.get("env")
-
 io = require("socket.io").listen(server)
 
+process.on "SIGTERM", () ->
+  console.log "Closing"
+  server.close()
 
+server.on "close", ()->
+  console.log "Closing db connection"
+  mongoose.connection.close()
+
+dbinterface = require "./components/dbinterface/dbinterface.coffee"
+models = ["./server/admin/rooms/roomsModel.coffee"]
 mongoose.connection.once "open", () ->
-  rooms = require "./server/admin/rooms/roomsCtrl.coffee"
+  for model in models
+    do (model) -> 
+      name = require(model)
+      dbinterface.expose(io, name)
 
-  io.sockets.on "connection", (client) ->
-    client.on "rooms.read", () ->
-      rooms.read (data) ->
-        client.emit "roomsData",data
-    client.on "rooms.create", (data) ->
-      console.log "recieved"+data
-      rooms.create(data) 
+
+io.sockets.on "connection", (client) ->
+  client.on "institutes", () ->
+    client.emit("institutes.data", config.get("institutes"))

@@ -1,3 +1,31 @@
-.viewport(ng-scroll-viewport, style="height:200px")
-  .rooms(ng-scroll="room in rooms")
-    {{room.name}}
+#rooms
+  table.table.table-striped(infinite-scroll="rooms.next()",
+    infinite-scroll-distance=2,
+    infinite-scroll-disabled="busy")
+    tr 
+      td 
+        input.form-control(ng-model="rooms.filter.name",
+          placeholder="Name",
+          ng-change="rooms.update()")
+      td
+        select(ui-select2="instoptions",ng-model="rooms.filter.institute",ng-change="updateinst()")
+          option
+          option(ng-repeat="inst in institutes") {{inst}}
+      td
+        input(ui-select2="instsoptions",ng-model="rooms.filter.secInstitutes",ng-change="updateinst()")
+      td
+        button.btn(ng-click="rooms.save()") Speichern
+    tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict")
+      td
+        input.form-control(ng-model="room.name")
+      td
+        select(ui-select2="instoptions",ng-model="room.institute")
+          option
+          option(ng-repeat="inst in institutes") {{inst}}
+      td
+        input(ui-select2="instsoptions",ng-model="room.secInstitutes",ng-change="rooms.update()")
+      td
+        button.btn(ng-click="rooms.save()") Löschen
+
+  .busy(ng-show="rooms.busy") Lade Daten..
+  
