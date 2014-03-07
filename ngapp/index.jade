@@ -1,0 +1,67 @@
+doctype html
+// [if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]
+// [if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]
+// [if IE 8]>         <html class="no-js lt-ie9"> <![endif]
+// [if gt IE 8]>
+html.no-js 
+  // <![endif]
+  head
+    meta(charset="utf-8")
+    meta(http-equiv="X-UA-Compatible",content="IE=edge")
+    title Vinston
+    meta(name="description",content="")
+    meta(name="viewport",content="width=device-width")
+    // build:css styles/vendor.css
+    // bower:css
+    link(rel='stylesheet', href='vendor/bootstrap/dist/css/bootstrap.css')
+    link(rel='stylesheet', href='vendor/angular-grid/ng-grid.min.css')
+    // endbower
+    // endbuild 
+    // build:css({.tmp,app}) styles/main.css 
+    link(rel="stylesheet" href="main.css")
+    // endbuild 
+  body(ng-app="vinstonApp",data-spy="scroll",data-target="nav.navbar")
+    // [if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. 
+      Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+      ![endif]
+    .container
+      nav.navbar.navbar-default(role="navigation")
+        .navbar-header
+          a.navbar-brand(href="#")
+            span Vinston
+          ul.nav.navbar-nav
+            li 
+              a(href="#") Für Studenten
+            li 
+              a(href="#") Für Dozenten
+            li.dropdown
+              a.dropdown-toggle(href="#",data-toggle="dropdown") Für Administratoren
+                b.caret
+              ul.dropdown-menu
+                li 
+                  a(href="#rooms") Räume
+    .container(ng-view)
+    // build:js vendor/vendor.js
+    // bower:js
+    script(src='vendor/jquery/jquery.js')
+    script(src='vendor/es5-shim/es5-shim.js')
+    script(src='vendor/angular/angular.js')
+    script(src='vendor/json3/lib/json3.min.js')
+    script(src='vendor/bootstrap/dist/js/bootstrap.js')
+    script(src='vendor/angular-resource/angular-resource.js')
+    script(src='vendor/angular-cookies/angular-cookies.js')
+    script(src='vendor/angular-sanitize/angular-sanitize.js')
+    script(src='vendor/angular-route/angular-route.js')
+    script(src='vendor/ocLazyLoad/ocLazyLoad.min.js')
+    script(src='vendor/angular-ui-utils/ui-utils.js')
+    script(src='vendor/angular-bootstrap/ui-bootstrap-tpls.js')
+    script(src='vendor/angular-grid/build/ng-grid.min.js')
+    // endbower
+    script(src='vendor/script.js/dist/script.js')
+    script(src='vendor/socket.io-client/dist/socket.io.js')
+    // endbuild
+        
+    // build:js({.tmp,app}) scripts/scripts.js 
+    script(src="app.js")
+    // endbuild 
