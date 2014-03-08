@@ -1,31 +1,56 @@
 #rooms
-  table.table.table-striped(infinite-scroll="rooms.next()",
-    infinite-scroll-distance=2,
+  table.table.table-striped(
+    infinite-scroll="rooms.next()"
+    infinite-scroll-distance=2
     infinite-scroll-disabled="busy")
     tr 
       td 
-        input.form-control(ng-model="rooms.filter.name",
-          placeholder="Name",
-          ng-change="rooms.update()")
+        input.form-control(
+          ng-model="rooms.filter.name"
+          placeholder="Name"
+          ng-change="rooms.updateFilter()")
       td
-        select(ui-select2="instoptions",ng-model="rooms.filter.institute",ng-change="updateinst()")
+        select.single-chosen(
+          chosen
+          allow-single-deselect="true"
+          data-placeholder="Institut"
+          ng-model="rooms.filter.institute"
+          ng-change="rooms.updateFilter()"
+          ng-options="inst for inst in institutes")
           option
-          option(ng-repeat="inst in institutes") {{inst}}
+          
       td
-        input(ui-select2="instsoptions",ng-model="rooms.filter.secInstitutes",ng-change="updateinst()")
+        select.multiple-chosen.form-control(
+          chosen
+          multiple
+          data-placeholder="Zusätzliche Institute"
+          ng-model="rooms.filter.secInstitutes"
+          ng-change="rooms.updateFilter()"
+          ng-options="inst for inst in institutes")
       td
-        button.btn(ng-click="rooms.save()") Speichern
+        button.btn(ng-click="rooms.insert()") Einfügen
     tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict")
       td
-        input.form-control(ng-model="room.name")
+        input.form-control(ng-model="room.name",ng-change="rooms.setChanged(room)")
       td
-        select(ui-select2="instoptions",ng-model="room.institute")
-          option
-          option(ng-repeat="inst in institutes") {{inst}}
+        select.single-chosen.form-control(
+          chosen
+          data-placeholder="Institut"
+          ng-model="room.institute"
+          ng-change="rooms.setChanged(room)"
+          ng-options="inst for inst in institutes")
+
       td
-        input(ui-select2="instsoptions",ng-model="room.secInstitutes",ng-change="rooms.update()")
+        select.multiple-chosen.form-control(
+          chosen
+          multiple
+          data-placeholder="Zusätzliche Institute"
+          ng-model="room.secInstitutes"
+          ng-change="rooms.setChanged(room)"
+          ng-options="inst for inst in institutes")
       td
-        button.btn(ng-click="rooms.save()") Löschen
+        button.btn(ng-click="rooms.update(room)",ng-show="room.changed") Update
+        button.btn(ng-click="rooms.remove(room)",ng-hide="room.changed") Löschen
 
   .busy(ng-show="rooms.busy") Lade Daten..
   

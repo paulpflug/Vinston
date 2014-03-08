@@ -3,8 +3,8 @@ Schema = mongoose.Schema
 modelName = "rooms"
 roomSchema = new Schema(
   name: String,
-  institute: String,
-  secInstitutes: Array
+  institute: { type: String, default: "" },
+  secInstitutes: { type: Array, default: [] }
 )
 
 mongoose.model(modelName, roomSchema)

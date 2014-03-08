@@ -46,9 +46,12 @@ vinstonApp.factory "socketData", ($rootScope,$filter) ->
   factory.busy = false
   factory.after = 0
   factory.totalCount = 0
+  factory.status
   factory.setDatatype = (name) ->
     factory.datatype = name
-  
+    window.socket.on factory.datatype + ".status", (data) ->
+      console.log "recieved status" + 
+      factory.status = data
   factory.find = (cb, collection) ->
     if not factory.datatype
       console.log "first setDatatype"
@@ -72,7 +75,7 @@ vinstonApp.factory "socketData", ($rootScope,$filter) ->
           factory.data.push d for d in data
           factory.busy = false
           factory.after += 20
-          $rootScope.$$phase || $rootScope.$apply();
+          $rootScope.$$phase || $rootScope.$apply()
       , {options : {skip:factory.after,limit:20}, find: modifiedFilter}
       )
   factory.count = () ->
@@ -81,21 +84,50 @@ vinstonApp.factory "socketData", ($rootScope,$filter) ->
       return
     window.socket.once factory.datatype + ".countdata", (data) ->
       factory.totalCount = $filter("filter")(data,factory.filter,"true").length
-    modifiedFilter = {}
-    
+
+    modifiedFilter = {}    
     for key,value of factory.filter
       if typeof value == "string" and value != ""
         modifiedFilter[key] = { $regex: value }
     window.socket.emit factory.datatype + ".count", {find: modifiedFilter}  
-  factory.update = () ->
+
+  factory.setChanged = (arrayItem) ->
+    console.log "found change "+arrayItem.name
+    arrayItem.changed = true
+  factory.updateFilter = () ->
     factory.count()
+    for k,v of factory.filter
+      if !v
+        delete factory.filter[k]
+    console.log(factory.filter)
     if $filter("filter")(factory.data,factory.filter,"true").length<20
       factory.next()
-  factory.save = () ->
-    window.socket.emit factory.datatype + ".save", factory.filter
-    factory.data.push factory.filter
-    factory.filter = {}
+  factory.insert = () ->
+    window.socket.emit factory.datatype + ".insert", factory.filter
+    window.socket.once factory.datatype + ".insert.status", (data) ->
+      if data[0]
+        factory.filter = {}
+        factory.data.push data[2]        
+        $rootScope.$$phase || $rootScope.$apply()
+  factory.update = (arrayItem) ->
+    window.socket.emit factory.datatype + ".update", arrayItem
+    window.socket.once factory.datatype + ".update.status", (data) ->
+      if data[0]
+        arrayItem.changed = false
+        $rootScope.$$phase || $rootScope.$apply()
+      else
+        factory.find((data)->
+            arrayItem = data
+            $rootScope.$$phase || $rootScope.$apply()
+          ,{find:{_id:arrayItem._id}})
 
+  factory.remove = (arrayItem) ->
+    window.socket.emit factory.datatype + ".remove", arrayItem._id
+    window.socket.once factory.datatype + ".remove.status", (data) ->
+      if data[0]
+        index = factory.data.indexOf arrayItem
+        factory.data.splice index,1
+        $rootScope.$$phase || $rootScope.$apply()
   return factory
 
 vinstonApp.service "globals", ($rootScope,$q) ->

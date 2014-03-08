@@ -6,3 +6,4 @@ vendor
 *.sublime-project
 *.sublime-workspace
 ngapp_compiled
+npm-debug.log
