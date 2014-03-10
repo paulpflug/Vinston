@@ -4,9 +4,9 @@ angular.module("RoomsModule",["oc.lazyLoad",
    "infinite-scroll",
    "localytics.directives", 
    "ui.bootstrap"])
-.controller "RoomsCtrl", ($scope,$filter,socketData,globals) ->
+.controller "RoomsCtrl", ($scope,$filter,socketData,globals,toaster) ->
   $scope.rooms = socketData
-  $scope.rooms.setDatatype("rooms")
+  $scope.rooms.setup "rooms", "name"
   $scope.rooms.count()
   $scope.institutes = []
   globals.institutes.then (data) ->

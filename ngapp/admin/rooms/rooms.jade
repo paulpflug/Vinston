@@ -1,6 +1,6 @@
 #rooms
   table.table.table-striped(
-    infinite-scroll="rooms.next()"
+    infinite-scroll="rooms.count()"
     infinite-scroll-distance=2
     infinite-scroll-disabled="busy")
     tr 
@@ -8,7 +8,8 @@
         input.form-control(
           ng-model="rooms.filter.name"
           placeholder="Name"
-          ng-change="rooms.updateFilter()")
+          ng-change="rooms.updateFilter()"
+          ng-disabled="rooms.disabled")
       td
         select.single-chosen(
           chosen
@@ -16,7 +17,8 @@
           data-placeholder="Institut"
           ng-model="rooms.filter.institute"
           ng-change="rooms.updateFilter()"
-          ng-options="inst for inst in institutes")
+          ng-options="inst for inst in institutes"
+          ng-disabled="rooms.disabled")
           option
           
       td
@@ -26,9 +28,10 @@
           data-placeholder="Zusätzliche Institute"
           ng-model="rooms.filter.secInstitutes"
           ng-change="rooms.updateFilter()"
-          ng-options="inst for inst in institutes")
+          ng-options="inst for inst in institutes"
+          ng-disabled="rooms.disabled")
       td
-        button.btn(ng-click="rooms.insert()") Einfügen
+        button.btn(ng-click="rooms.insert()",ng-disabled="rooms.disabled") Einfügen
     tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict")
       td
         input.form-control(ng-model="room.name",ng-change="rooms.setChanged(room)")
