@@ -7,6 +7,7 @@ vinstonApp = angular.module("vinstonApp", [
   "oc.lazyLoad"
   "angular-md5"
   "toaster"
+  "ui.bootstrap"
 ])
 
 vinstonApp.config ['$ocLazyLoadProvider',
@@ -29,7 +30,7 @@ vinstonApp.config ['$routeProvider',
         ]
     ).when("/rooms",
       templateUrl: "admin/rooms/rooms.html"
-      controller: 'RoomsCtrl'
+      controller: "RoomsCtrl"
       resolve: 
         test: ['$ocLazyLoad',
           ($ocLazyLoad) ->
@@ -44,49 +45,91 @@ vinstonApp.factory "socketData", ($rootScope,$filter,md5,toaster) ->
   factory = {}
   factory.disabled = true
   factory.datatype = ""
-  factory.nameOfItem = "name"
+  factory.options = {
+    nameOfItem : "name"
+    idOfItem : "_id"
+    parentIdOfItem : "parentId"
+    nameOfDatabase : ""
+    showDeleted : false
+    showDiffs : true
+  }
   factory.data = []
+  factory.unchangedData = []
+  factory.history = []
+  factory.historyVisible = false
+  factory.historyLatestVersion = 1
   factory.filter = {}
   factory.busy = false
+  factory.inconsistent = false
   factory.after = 0
   factory.totalCount = 0
-  factory.socket
-  factory.setup = (datatype, nameOfItem) ->
+  factory.setup = (datatype, options) ->
     factory.datatype = datatype
-    factory.nameOfItem = nameOfItem
+    for k,v of options
+      factory.options[k] = v
+    factory.reset()
     window.socket.emit "subscribe", datatype
     window.socket.on factory.datatype + ".inserted", (data) ->
       if(factory.after >= factory.totalCount)
-        factory.data.push data
-        toaster.pop "info", "Neuer Raum", factory.getName(data) + " wurde hinzugefügt."   
+        factory.addLocally data
+        toaster.pop "info", factory.options.nameOfDatabase + " hinzugefügt", factory.getName(data) + " wurde hinzugefügt."   
         $rootScope.$$phase || $rootScope.$apply()
     window.socket.on factory.datatype + ".updated", (newdata) ->
-        olddata = $.grep(factory.data, (e) -> return e._id == newdata._id );
-        if olddata and olddata[0] 
-          olddata = olddata[0]         
-          s = factory.getName(olddata) + " wurde" 
+      index = _.findIndex factory.data, (item) -> item[factory.options.idOfItem] == newdata[factory.options.idOfItem]
+      if index > -1     
+        olddata = item[index]        
+        s = factory.getName(olddata) + " wurde" 
+        if newdata.deleted
+          index = factory.data.indexOf olddata
+          factory.removeLocally index
+          toaster.pop "info", factory.options.nameOfDatabase + " entfernt", s+" entfernt." 
+          $rootScope.$$phase || $rootScope.$apply()  
+        else
           if factory.getName(newdata) != factory.getName(olddata)
             s += " zu "+ factory.getName(newdata)
           s+= " verändert."
-          toaster.pop "info", "Raum geändert", s   
+          toaster.pop "info", factory.options.nameOfDatabase + " verändert", s   
           index = factory.data.indexOf olddata
           factory.data[index] = newdata
           $rootScope.$$phase || $rootScope.$apply()
+      else
+        toaster.pop "info", factory.options.nameOfDatabase + " verändert", factory.getName(newdata)+ " wurde verändert"
+        factory.count()
     window.socket.on factory.datatype + ".deleted", (id) ->
-        olddata = $.grep(factory.data, (e) -> return e._id == id );
-        if olddata and olddata[0]     
-          olddata = olddata[0]     
-          toaster.pop "info", "Raum gelöscht", factory.getName(olddata) + " wurde gelöscht"   
-          index = factory.data.indexOf olddata
-          factory.data.splice index,1
-          $rootScope.$$phase || $rootScope.$apply()
+      index = _.findIndex factory.data, (item) -> item[factory.options.idOfItem] == id
+      if index > -1     
+        olddata = item[index]     
+        toaster.pop "info", factory.options.nameOfDatabase + " entfernt", factory.getName(olddata) + " wurde entfernt"   
+        index = factory.data.indexOf olddata
+        factory.removeLocally index
+        $rootScope.$$phase || $rootScope.$apply()
   factory.getName = (arrayItem) ->
-    if arrayItem[factory.nameOfItem]
-      return arrayItem[factory.nameOfItem]
+    if arrayItem[factory.options.nameOfItem]
+      return arrayItem[factory.options.nameOfItem]
     else
-      return arrayItem["_id"]
+      return arrayItem[factory.options.idOfItem]
+  factory.reset = () ->
+    factory.data = []
+    factory.unchangedData = []
+    factory.count()
+  factory.toggleDeleted = () ->
+    factory.options.showDeleted = !factory.options.showDeleted
+    factory.reset()
   factory.setChanged = (arrayItem) ->
-    arrayItem.changed = true
+    indexold = _.findIndex factory.unchangedData, (item) -> item[factory.options.idOfItem] == arrayItem[factory.options.idOfItem]
+    if indexold >-1
+      indexnew = factory.data.indexOf arrayItem
+      if indexold == indexnew  
+        oldItem = factory.unchangedData[indexold]
+        newItem = _.cloneDeep(arrayItem)
+        delete newItem.changed
+        delete newItem["$$hashKey"]
+        diff = DeepDiff.diff(oldItem,newItem)
+        arrayItem.changed = if diff then true else false
+        $rootScope.$$phase || $rootScope.$apply()
+      else
+        factory.setInconsistent()
+    
 
   factory.find = (cb, collection) ->
     hash = md5.createHash(angular.toJson(collection))
@@ -96,36 +139,6 @@ vinstonApp.factory "socketData", ($rootScope,$filter,md5,toaster) ->
       console.log "recieved " + factory.datatype
       cb(data)
     
-  factory.next = () ->
-    return if factory.busy
-    factory.after = $filter("filter")(factory.data,factory.filter,"true").length
-    console.log factory.after
-    console.log factory.totalCount
-    if(factory.after< factory.totalCount)
-      factory.busy = true
-      modifiedFilter = {}
-      for key,value of factory.filter
-        if typeof value == "string" and value != ""
-          modifiedFilter[key] = { $regex: value }
-      factory.find((data) ->
-          factory.disabled = false
-          for d in data
-            index = factory.data.indexOf d
-            if index > -1
-              factory.data = []
-              toaster.pop "error", "Inkonsistent", "Die Daten sind inkonsistent - lade neu"
-              $rootScope.$$phase || $rootScope.$apply()
-              return
-            else
-              factory.data.push d
-          factory.busy = false
-          factory.after += 20
-          $rootScope.$$phase || $rootScope.$apply()
-      , {options : {skip:factory.after,limit:20}, find: modifiedFilter}
-      )
-    else
-      $rootScope.$$phase || $rootScope.$apply()
-
   factory.count = () ->
     modifiedFilter = {}    
     for key,value of factory.filter
@@ -133,12 +146,37 @@ vinstonApp.factory "socketData", ($rootScope,$filter,md5,toaster) ->
         modifiedFilter[key] = { $regex: value }
       if typeof value == "object" and value.length >0
         modifiedFilter[key] = value
+    if not factory.options.showDeleted
+      modifiedFilter.deleted = false
     collection = {find: modifiedFilter}
     hash = md5.createHash(angular.toJson(collection))
     window.socket.emit factory.datatype + ".count", {collection: collection, hash:hash} 
     window.socket.once factory.datatype + ".countdata." + hash, (count) ->
       factory.totalCount = count
-      factory.next()
+      return if factory.busy
+      factory.after = $filter("filter")(factory.data,factory.filter,"true").length
+      if(factory.after< factory.totalCount)
+        factory.busy = true
+        factory.find((data) ->
+            factory.disabled = false
+            for d in data
+              index = _.findIndex factory.data, (item) -> item[factory.options.idOfItem] == d[factory.options.idOfItem]
+              if index > -1
+                factory.busy = false
+                factory.setInconsistent()
+                return
+              else
+                factory.addLocally d
+            if factory.inconsistent
+              toaster.pop "success", "Inkonsistenz beseitigt", "Neu geladen - die Daten sind nun konsistent"
+            factory.busy = false
+            factory.after += 20
+            $rootScope.$$phase || $rootScope.$apply()
+        , {options : {skip:factory.after,limit:20}, find: modifiedFilter}
+        )
+      else
+        factory.disabled = false
+        $rootScope.$$phase || $rootScope.$apply()
 
   factory.updateFilter = () ->
     for k,v of factory.filter
@@ -151,39 +189,130 @@ vinstonApp.factory "socketData", ($rootScope,$filter,md5,toaster) ->
     window.socket.emit factory.datatype + ".insert", {item: factory.filter, hash: hash}
     window.socket.once factory.datatype + ".insert.status." + hash, (data) ->
       if data[0]
-        factory.data.push data[1]
+        factory.addLocally(data[1])
         factory.filter = {}   
         factory.updateFilter()
         toaster.pop "success", "Erfolg", factory.getName(data[1]) + " wurde gespeichert."   
       else
         if data[1]
           toaster.pop "error", "Fehler", data[1] 
-              
-  factory.update = (arrayItem) ->
+  factory.useOldItem = (arrayItem) ->
+    arrayItem.version = factory.historyLatestVersion
+    arrayItem.updated = factory.history[0].updated
+    factory.update arrayItem      
+  factory.update = (arrayItem, cb) ->
     hash = md5.createHash(angular.toJson(arrayItem))
-    window.socket.emit factory.datatype + ".update", {item: arrayItem, hash: hash}
-    window.socket.once factory.datatype + ".update.status." + hash, (data) ->
+    index = _.findIndex factory.unchangedData, (item) -> item[factory.options.idOfItem] == arrayItem[factory.options.idOfItem]
+    if index >-1
+      oldItem = factory.unchangedData[index]
+      newItem = _.cloneDeep(arrayItem)
+      delete newItem.changed
+      delete newItem["$$hashKey"]
+      changeItem = DeepDiff.diff(newItem,oldItem)
+      if !cb
+        cb = (data) ->
+          if data[0]
+            delete data[1].changed 
+            factory.setLocally(index,data[1])               
+            toaster.pop "success", "Erfolg", factory.getName(arrayItem) + " wurde gespeichert."
+            $rootScope.$$phase || $rootScope.$apply()
+          else
+            if data[1]
+              toaster.pop "error", "Fehler", data[1] 
+      window.socket.emit factory.datatype + ".update", {item: arrayItem, hash: hash, changeItem: changeItem}
+      window.socket.once factory.datatype + ".update.status." + hash, cb
+    else
+      factory.reset()
+  factory.setInconsistent = () ->
+    toaster.pop "error", "Inkonsistent", "Die Daten sind inkonsistent - lade neu"
+    factory.inconsistent = true
+    factory.reset()
+  factory.unchange = (arrayItem) ->
+    indexold = _.findIndex factory.unchangedData, (item) -> item[factory.options.idOfItem] == arrayItem[factory.options.idOfItem]
+    if indexold >-1
+      indexnew = factory.data.indexOf arrayItem
+      if indexold == indexnew  
+        factory.data[indexnew] = _.cloneDeep(factory.unchangedData[indexnew])
+        $rootScope.$$phase || $rootScope.$apply()
+      else
+        factory.setInconsistent()
+  factory.delete = (arrayItem) ->
+    arrayItem.deleted = true
+    factory.update arrayItem, (data) ->
       if data[0]
-        arrayItem.changed = false        
-        toaster.pop "success", "Erfolg", factory.getName(arrayItem) + " wurde gespeichert."
+        toaster.pop "success", "Erfolg", factory.getName(arrayItem) + " wurde gelöscht."
+        if !factory.options.showDeleted
+          index = factory.data.indexOf arrayItem
+          factory.removeLocally(index)
         $rootScope.$$phase || $rootScope.$apply()
       else
         if data[1]
           toaster.pop "error", "Fehler", data[1] 
-
-
+  factory.undelete = (arrayItem) ->
+    arrayItem.deleted = false
+    factory.update arrayItem, (data) ->
+      if data[0]
+        toaster.pop "success", "Erfolg", factory.getName(arrayItem) + " wurde hinzugefügt."  
+        $rootScope.$$phase || $rootScope.$apply()
+      else
+        if data[1]
+          toaster.pop "error", "Fehler", data[1]
   factory.remove = (arrayItem) ->
-    hash = md5.createHash(arrayItem._id)
-    window.socket.emit factory.datatype + ".remove", {itemid: arrayItem._id, hash: hash}
+    hash = md5.createHash(arrayItem[factory.options.idOfItem])
+    window.socket.emit factory.datatype + ".remove", {itemid: arrayItem[factory.options.idOfItem], hash: hash}
     window.socket.once factory.datatype + ".remove.status." + hash, (data) ->
       if data[0]
         index = factory.data.indexOf arrayItem
-        factory.data.splice index,1
-        toaster.pop "success", "Erfolg", factory.getName(arrayItem) + " wurde gelöscht."
+        factory.removeLocally(index)
+        toaster.pop "success", "Erfolg", factory.getName(arrayItem) + " wurde entfernt."
         $rootScope.$$phase || $rootScope.$apply()        
       else
         if data[1]
           toaster.pop "error", "Fehler", data[1]
+  factory.addLocally = (arrayItem) ->
+    factory.data.push arrayItem
+    factory.unchangedData.push(_.cloneDeep(arrayItem))
+  factory.setLocally = (index,arrayItem) ->
+    currentid = factory.data[index][factory.options.idOfItem]
+    currentid2 = factory.unchangedData[index][factory.options.idOfItem]
+    if arrayItem[factory.options.idOfItem] == currentid and currentid == currentid2
+      factory.data[index] = _.cloneDeep(arrayItem)
+      factory.unchangedData[index] = _.cloneDeep(arrayItem)
+    else
+      factory.setInconsistent()
+  factory.removeLocally = (index) ->
+    factory.data.splice index,1
+    factory.unchangedData.splice index,1
+  
+  factory.showHistory = (arrayItem) ->
+    factory.historyVisible = true
+    factory.history = []
+    factory.history.push arrayItem
+    factory.historyLatestVersion = arrayItem.version
+    find = {}
+    find[factory.options.parentIdOfItem] = arrayItem[factory.options.idOfItem]
+    options = { sort: { version: -1}}
+    collection = {find: find, options: options}
+    hash = md5.createHash(angular.toJson(collection))
+    window.socket.emit factory.datatype + ".history", {collection: collection, hash: hash}
+    console.log "requested " + factory.datatype
+    window.socket.once factory.datatype + ".history." + hash, (data) ->
+      console.log "recieved " + factory.datatype
+      oldItem = arrayItem 
+      newItem = _.cloneDeep(arrayItem)           
+      for item in data
+        for change in item.changes
+          DeepDiff.applyChange(newItem,oldItem,change)
+        delete oldItem["$$hashKey"]
+        newItem.updated = item.updated
+        newItem.updatedBy = item.updatedBy
+        newItem.version = item.version
+        factory.history.push newItem
+        oldItem = newItem
+        newItem = _.cloneDeep(newItem)
+      $rootScope.$$phase || $rootScope.$apply()   
+          
+
   return factory
 
 vinstonApp.service "globals", ($rootScope,$q) ->

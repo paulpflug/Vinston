@@ -1,0 +1,28 @@
+.modal-header
+  link(rel="stylesheet" href="admin/rooms/rooms.css")
+  h4 Versionen 
+.modal-body
+  table.table.table-striped.table-condensed.table-bordered(ng-show="rooms.historyVisible")
+      tr
+        td Version
+        td Geändert
+        td Gelöscht
+        td Name
+        td Institut
+        td Zusätzliche Institute
+        td Aktionen
+      tr(ng-repeat="room in rooms.history",ng-class="{danger: room.deleted}")
+        td
+          {{room.version}}
+        td 
+          {{room.updated | date:'H:mm:ss dd.MM.'}}
+        td 
+          input(type="checkbox",ng-model="room.deleted")
+        td
+          {{room.name}}
+        td
+          {{room.institute}}
+        td
+          {{room.secInstitutes}}
+        td
+          button.btn(ng-click="useOldItem(room)",ng-show="room.version < rooms.historyLatestVersion") Als neu benutzen

@@ -3,7 +3,7 @@ module.exports = {
     mongoose = require 'mongoose'
 
     model = mongoose.model modelName
-
+    modelVersions = mongoose.model modelName+"Versions"
     io.sockets.on "connection", (client) ->
       client.on "subscribe", (room) -> 
         client.join modelName if room == modelName 
@@ -48,13 +48,26 @@ module.exports = {
           if data.item and data.item._id
             id = data.item._id
             ["_id","$$hashKey","__v"].forEach (string) -> delete data.item[string]
-            model.update {_id:id}, data.item, {}, (err) -> 
+            oldversion = new modelVersions()
+            oldversion.parentId = id
+            oldversion.version = data.item.version
+            oldversion.changes = data.changeItem
+            oldversion.updated = data.item.updated
+            oldversion.updatedBy = ""
+            data.item.version++
+            data.item.updated = Date.now()
+            oldversion.save (err) ->
               if err
-                client.emit(modelName + ".update.status." + data.hash, [false,"Error"]) 
+                client.emit(modelName + ".update.status." + data.hash, [false,"Error"])
+                console.log(err)
               else
-                client.emit(modelName + ".update.status." + data.hash, [true]) 
-                data.item._id = id
-                client.broadcast.in(modelName).emit(modelName+".updated",data.item)  
+                model.update {_id:id}, data.item, {}, (err) -> 
+                  if err
+                    client.emit(modelName + ".update.status." + data.hash, [false,"Error"]) 
+                  else                    
+                    data.item._id = id
+                    client.emit(modelName + ".update.status." + data.hash, [true, data.item]) 
+                    client.broadcast.in(modelName).emit(modelName+".updated",data.item)  
           else
             client.emit(modelName + ".update.status." + data.hash, [false,"_id fehlt"])
 
@@ -65,8 +78,22 @@ module.exports = {
               if err
                 client.emit(modelName + ".remove.status." + data.hash, [false,"Error"]) 
               else
-                client.emit(modelName + ".remove.status." + data.hash, [true]) 
-                client.broadcast.in(modelName).emit(modelName+".deleted",data.itemid) 
+                modelVersions.remove {parentId:data.itemid}, (err) ->
+                  if err
+                    client.emit(modelName + ".remove.status." + data.hash, [false,"Error"]) 
+                  else
+                    client.emit(modelName + ".remove.status." + data.hash, [true]) 
+                    client.broadcast.in(modelName).emit(modelName+".deleted",data.itemid) 
           else
             client.emit(modelName + ".remove.status." + data.hash, [false,"_id fehlt"])
+
+      client.on modelName + ".history", (data) ->
+        collection = data.collection
+        hash = data.hash
+        find = if collection and collection.find then collection.find else {} 
+        fields = if collection and collection.fields then collection.fields else null
+        options = if collection and collection.options then collection.options else null
+        modelVersions.find find, fields, options, (err,data) ->
+          return if err
+          client.emit(modelName + ".history." + hash, data)
 }

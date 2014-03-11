@@ -1,4 +1,6 @@
+
 #rooms
+  button.btn(ng-click="rooms.toggleDeleted()",ng-disabled="rooms.disabled") gelöschte Anzeigen
   table.table.table-striped(
     infinite-scroll="rooms.count()"
     infinite-scroll-distance=2
@@ -32,16 +34,21 @@
           ng-disabled="rooms.disabled")
       td
         button.btn(ng-click="rooms.insert()",ng-disabled="rooms.disabled") Einfügen
-    tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict")
+    tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict"
+      ng-class="{danger: room.deleted, warning: room.changed}")
       td
-        input.form-control(ng-model="room.name",ng-change="rooms.setChanged(room)")
+        input.form-control(
+          ng-model="room.name"
+          ng-change="rooms.setChanged(room)"
+          ng-disabled="room.deleted")
       td
         select.single-chosen.form-control(
           chosen
           data-placeholder="Institut"
           ng-model="room.institute"
           ng-change="rooms.setChanged(room)"
-          ng-options="inst for inst in institutes")
+          ng-options="inst for inst in institutes"
+          ng-disabled="room.deleted")
 
       td
         select.multiple-chosen.form-control(
@@ -50,10 +57,13 @@
           data-placeholder="Zusätzliche Institute"
           ng-model="room.secInstitutes"
           ng-change="rooms.setChanged(room)"
-          ng-options="inst for inst in institutes")
+          ng-options="inst for inst in institutes"
+          ng-disabled="room.deleted")
       td
         button.btn(ng-click="rooms.update(room)",ng-show="room.changed") Update
-        button.btn(ng-click="rooms.remove(room)",ng-hide="room.changed") Löschen
-
+        button.btn(ng-click="rooms.unchange(room)",ng-show="room.changed") Rückgängig
+        button.btn(ng-click="rooms.delete(room)",ng-show="!room.changed && !room.deleted") Löschen
+        button.btn(ng-click="rooms.undelete(room)",ng-show="!room.changed && room.deleted") Hinzufügen
+        button.btn(ng-click="rooms.remove(room)",ng-show="room.deleted") Entfernen
+        button.btn(ng-click="showHistory(room)",ng-show="room.version>1") Geschichte
   .busy(ng-show="rooms.busy") Lade Daten..
-  
