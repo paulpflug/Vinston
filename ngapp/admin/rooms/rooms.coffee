@@ -4,12 +4,12 @@ angular.module("RoomsModule",["oc.lazyLoad",
    "infinite-scroll",
    "localytics.directives", 
    "ui.bootstrap"])
-.controller("RoomsCtrl", ($scope, $filter, $modal, socketData, globals) ->
+.controller("RoomsCtrl", ($scope, $filter, $modal, socketData, config) ->
   $scope.institutes = []
-  globals.institutes.then (data) ->
+  config.get("institutes").then (data) ->
      $scope.institutes = data
   $scope.rooms = socketData
-  $scope.rooms.setup "rooms", {
+  $scope.rooms.setup "rooms", $scope, {
     nameOfItem: "name"
     nameOfDatabase: "Raum"
     useDiffs: true

@@ -1,4 +1,4 @@
-mongoose = require('mongoose')
+mongoose = require "mongoose"
 Schema = mongoose.Schema
 modelName = "rooms"
 roomSchema = new Schema(

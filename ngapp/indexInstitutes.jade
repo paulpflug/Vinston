@@ -1,0 +1,16 @@
+.modal-header
+  link(rel="stylesheet" href="indexInstitutes.css")
+  .current(ng-if="activeInstitute")
+    h4 Aktuell
+    .institute(ng-click="setInstitute(activeInstitute)")
+      img.img-rounded(ng-src="{{activeInstitute.image}}")
+      span.text-right {{activeInstitute.name}}
+  h4(ng-if="activeInstitute") Andere
+  h4(ng-if="!activeInstitute") Institute
+.modal-body
+  p.loading(ng-hide="ready") Lade ...
+  .institute(ng-repeat="institute in institutes | isNot:activeInstitute:'name'"
+    ng-click="setInstitute(institute)"
+    )
+    img.img-rounded(ng-src="{{institute.image}}")
+    span.text-right {{institute.name}}

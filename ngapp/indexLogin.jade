@@ -1,0 +1,16 @@
+.modal-body
+  .panel.panel-primary
+    .panel-heading
+      .panel-title Login
+    .panel-body(style="padding-top:30px")
+      .input-group(style="margin-bottom: 25px")
+        span.input-group-addon
+          i.glyphicon.glyphicon-user
+        input.form-control(type="text" placeholder="Name")   
+      .input-group(style="margin-bottom: 25px")                                     
+        span.input-group-addon
+          i.glyphicon.glyphicon-lock
+        input.form-control(type="password" placeholder="Passwort") 
+      .input-group                       
+        button.btn.btn-primary Login
+          i.fa.fa-spinner.fa-spin(ng-show="loginIn")

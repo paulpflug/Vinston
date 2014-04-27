@@ -1,0 +1,139 @@
+doctype html
+// [if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]
+// [if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]
+// [if IE 8]>         <html class="no-js lt-ie9"> <![endif]
+// [if gt IE 8]>
+html.no-js 
+  // <![endif]
+  head
+    meta(charset="utf-8")
+    meta(http-equiv="X-UA-Compatible",content="IE=edge")
+    title Vinston
+    meta(name="description",content="")
+    meta(name="viewport",content="width=device-width")
+    // build:css styles/vendor.css
+    // bower:css
+    link(rel='stylesheet', href='/vendor/bootstrap/dist/css/bootstrap.css')
+    link(rel='stylesheet', href='/vendor/AngularJS-Toaster/toaster.css')
+    // endbower
+    link(rel='stylesheet', href='/vendor/chosen/chosen.css')
+    link(rel='stylesheet', href='/vendor/font-awesome/css/font-awesome.css')
+    // endbuild 
+    // build:css({.tmp,app}) styles/main.css 
+    link(rel='stylesheet', href='/admin/install/install.css')
+    // endbuild 
+  body.container(ng-app="installApp",ng-controller="appCtrl")
+    // [if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. 
+      Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+      ![endif]
+    .jumbotron
+      h1 Willkommen bei Vinston
+      p Wir werden jetzt die Konfiguration des Servers vorbereiten.
+      i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="loaded")
+      .panel(
+        ng-show="loaded"
+        ng-class="{'panel-primary': !connectionSaved, 'panel-default': connectionSaved}")
+        .panel-heading
+          h3.panel-title Datenbank einrichten
+        .panel-body
+          form(
+              name="connectionForm"
+              ng-class="{'has-success':connectionTested && !connectionSaved, 'has-error':!connectionTested&&connectionForm.connectionString.$dirty &&  !connectionSaved}")
+            .col-md-10.input-addon
+              input.form-control(
+                  ng-disabled="userSaved"
+                  ng-model="mongoConnection"
+                  name="connectionString"
+                  placeholder="mongodb Verbindung (z.b. mongodb://localhost/Vinston )"
+                  ng-change="testConnection()")
+              i.fa.fa-spinner.fa-spin(ng-show="connectionTesting")
+            .col-md-2 
+              button.btn(
+                ng-class="{'btn-primary': !connectionSaved, 'btn-default': connectionSaved}"
+                ng-click="setConnection()"
+                ng-disabled="!connectionTested || connectionSaving ||connectionSaved") 
+                span.glyphicon(
+                  ng-class="{'glyphicon-save': !connectionSaved, 'glyphicon-ok': connectionSaved}"
+                  ng-show="!connectionSaving")
+                i.fa.fa-spinner.fa-spin(ng-show="connectionSaving")
+                span {{connectionSaved ? " Ok":" Speichern"}} 
+          span.label.label-danger(ng-show="connectionError") {{connectionError}}
+          span.label.label-info(ng-show="connectionInfo") {{connectionInfo}}
+          a.col-md-12(
+            target="_blank"
+            href="http://mongoosejs.com/docs/api.html#index_Mongoose-createConnection")
+            span Mongoose URI Dokumentation
+      .panel(
+        ng-show="loaded"
+        ng-disabled="connectionSaved"
+        ng-class="{'panel-primary': connectionSaved && !userSaved, 'panel-default': !(connectionSaved && !userSaved)}")
+        .panel-heading
+          h3.panel-title Admin anlegen
+        .panel-body
+          .col-md-5
+            .input-group
+              span.input-group-addon
+                i.glyphicon.glyphicon-user
+              input.form-control(
+                ng-disabled="!connectionSaved || userSaved"
+                ng-model="userName"
+                type="text"
+                placeholder="Name") 
+          .col-md-5
+            .input-group                                       
+              span.input-group-addon
+                i.glyphicon.glyphicon-lock
+              input.form-control(
+                ng-disabled="!connectionSaved || userSaved"
+                ng-model="userPassword"
+                type="password" 
+                placeholder="Passwort")
+          .col-md-2                    
+            button.btn(
+                ng-class="{'btn-primary': connectionSaved && !userSaved, 'btn-default': !(connectionSaved && !userSaved)}"
+                ng-click="setUser()"
+                ng-disabled="!userName || !userPassword || userSaving || userSaved || !connectionSaved")
+              span.glyphicon(
+                ng-class="{'glyphicon-save': !userSaved, 'glyphicon-ok': userSaved}"
+                ng-show="!userSaving")
+              i.fa.fa-spinner.fa-spin(ng-show="userSaving")
+              span {{userSaved ? " Ok":" Speichern"}} 
+          span.label.label-info(ng-show="userInfo") {{userInfo}}
+      a.btn(
+        href="/"
+        ng-show="loaded"
+        ng-class="{'btn-primary': userSaved, 'btn-default': !userSaved}"
+        ng-disabled="!userSaved")
+        span Weiter
+    // build:js vendor/vendor.js
+    // bower:js
+    script(src='/vendor/jquery/dist/jquery.js')
+    script(src='/vendor/es5-shim/es5-shim.js')
+    script(src='/vendor/angular/angular.js')
+    script(src='/vendor/json3/lib/json3.min.js')
+    script(src='/vendor/bootstrap/dist/js/bootstrap.js')
+    script(src='/vendor/angular-resource/angular-resource.js')
+    script(src='/vendor/angular-cookies/angular-cookies.js')
+    script(src='/vendor/angular-sanitize/angular-sanitize.js')
+    script(src='/vendor/angular-route/angular-route.js')
+    script(src='/vendor/angular-animate/angular-animate.js')
+    script(src='/vendor/ocLazyLoad/ocLazyLoad.min.js')
+    script(src='/vendor/angular-ui-utils/ui-utils.js')
+    script(src='/vendor/angular-bootstrap/ui-bootstrap-tpls.js')
+    script(src='/vendor/ngInfiniteScroll/ng-infinite-scroll.js')
+    script(src='/vendor/angular-chosen-localytics/chosen.js')
+    script(src='/vendor/angular-md5/angular-md5.js')
+    script(src='/vendor/AngularJS-Toaster/toaster.js')
+    script(src='/vendor/lodash/dist/lodash.compat.js')
+    // endbower
+    script(src='/vendor/chosen/chosen.jquery.js')
+    script(src='/vendor/script.js/dist/script.js')
+    script(src='/vendor/socket.io-client/dist/socket.io.js')
+    script(src='/vendor/deep-diff/index.js')
+    // endbuild
+        
+    // build:js({.tmp,app}) scripts/scripts.js 
+    script(src="/components/globals/globals.js")
+    script(src="/admin/install/install.js")
+    // endbuild 

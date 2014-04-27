@@ -2,16 +2,16 @@
   "name": "vinston",
   "version": "0.0.1",
   "dependencies": {
-    "angular": "1.2.14",
+    "angular": "~1.2.16",
     "json3": "~3.2.6",
     "es5-shim": "~2.1.0",
     "jquery": "~1.11.0",
     "bootstrap": "~3.1.1",
-    "angular-resource": "1.2.14",
-    "angular-cookies": "1.2.14",
-    "angular-sanitize": "1.2.14",
-    "angular-route": "1.2.14",
-    "angular-animate": "1.2.14",
+    "angular-resource": "~1.2.16",
+    "angular-cookies": "~1.2.16",
+    "angular-sanitize": "~1.2.16",
+    "angular-route": "~1.2.16",
+    "angular-animate": "~1.2.16",
     "socket.io-client": "~0.9.16",
     "script.js": "~2.5.2",
     "ocLazyLoad": "~0.0.3",
@@ -19,14 +19,15 @@
     "angular-bootstrap": "~0.10.0",
     "ngInfiniteScroll": "~1.0.0",
     "angular-chosen-localytics": "~1.0.5",
-    "chosen": "https://github.com/harvesthq/chosen/releases/download/1.0.0/chosen_v1.0.0.zip",
+    "chosen": "https://github.com/harvesthq/chosen/releases/download/v1.1.0/chosen_v1.1.0.zip",
     "angular-md5": "~0.1.7",
     "AngularJS-Toaster": "~0.4.4",
     "deep-diff": "~0.1.4",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "font-awesome": "~4.0.3"
   },
   "devDependencies": {
-    "angular-mocks": "1.2.14",
-    "angular-scenario": "1.2.14"
+    "angular-mocks": "~1.2.16",
+    "angular-scenario": "~1.2.16"
   }
 }

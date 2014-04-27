@@ -13,7 +13,7 @@ module.exports = (grunt) ->
   
   # Time how long tasks take. Can help when optimizing build times
   require("time-grunt") grunt
-  
+  process.env.dirname = __dirname
   # Define the configuration for all the tasks
   grunt.initConfig
     
@@ -24,7 +24,7 @@ module.exports = (grunt) ->
       app: require("./bower.json").appPath or "app"
       dist: "dist"
       livereload: 35729
-    
+      
     # Watches files for changes and runs tasks based on the changed files
     watch:
       options:
@@ -37,22 +37,29 @@ module.exports = (grunt) ->
         tasks: ['newer:jade']
       stylus:
         files: ["ngapp/**/*.styl"]
-        tasks: ['newer:stylus']
+        tasks: ['newer:stylus','autoprefixer']
       gruntfile:
         files: ["Gruntfile.coffee"]
+        tasks: [
+          "express:dev:stop"
+          "serve"
+        ]
+        options:
+          spawn: false
       bower:
         files: ["bower.json"]
         tasks: ["bowerInstall"]
       express:
-        tasks: ["express:dev"]
+        tasks: [
+          "express:dev"
+        ]
         files: [
-          "server.coffee"
           "resources/**/*"
           "server/**/*"
-          "ngapp_compiled/**/*"
         ]
         options:
           spawn: false
+          atBegin: true
     jade: 
       compile: 
         files: [
@@ -85,16 +92,11 @@ module.exports = (grunt) ->
     express:
       options:
         port: process.env.PORT or 9000
-        cmd: 'coffee'
+        opts: ['node_modules/coffee-script/bin/coffee']
       dev:
         options:
-          script: "server.coffee"
-      test:
-        options:
-          script: "server.coffee"
-      dist:
-        options:
-          script: "server.coffee"
+          script: "server/server.coffee"
+
     
     # Empties folders to start fresh
     clean:
@@ -105,15 +107,7 @@ module.exports = (grunt) ->
             "ngapp_compiled/*"
           ]
         ]
-      dist:
-        files: [
-          dot: true
-          src: [
-            ".tmp"
-            "<%= yeoman.dist %>/*"
-            "!<%= yeoman.dist %>/.git*"
-          ]
-        ]
+
     
     # Add vendor prefixed styles
     autoprefixer:
@@ -122,9 +116,9 @@ module.exports = (grunt) ->
       dist:
         files: [
           expand: true
-          cwd: "ngapp_compiled/'"
+          cwd: "ngapp_compiled/"
           src: "**/*.css"
-          dest: "ngapp_compiled/'"
+          dest: "ngapp_compiled/"
         ]
 
     # Automatically inject Bower components into the app
@@ -234,10 +228,9 @@ module.exports = (grunt) ->
       ])
     grunt.task.run [
       "clean:compile"
+      "bowerInstall"
       "concurrent:compile"
       "autoprefixer"
-      "bowerInstall"
-      "express:dev"
       "watch"
     ]
 
