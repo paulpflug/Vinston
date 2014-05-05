@@ -20,10 +20,14 @@ userSchema.pre "save", (next) ->
       user.password = hash
       return next()
 
-userSchema.methods.comparePassword = (candidatePassword, cb) -> 
+userSchema.methods.comparePassword = (candidatePassword) ->
+  d = Q.defer() 
   bcrypt.compare candidatePassword, this.password, (err, isMatch) -> 
-    return cb(err) if err 
-    cb null, isMatch
+    if err
+      d.reject(err) 
+    else
+      d.resolve(isMatch)
+  return d.promise
 
 loadModel = (connection) ->
   obj = if connection then connection else mongoose 
@@ -32,16 +36,16 @@ loadModel = (connection) ->
 
 checkForInstalled = (connection) ->
   d = Q.defer()
-  console.log "searching for admin"
+  console.log "searching for root"
   console.log "no connection given" if !connection
   if connection && connection.readyState
     model = loadModel(connection)
-    model.find({group:"admin"}).count (err,count) ->
+    model.find({group:"root"}).count (err,count) ->
       if err or not count or count == 0
-        console.log "no admin found"
+        console.log "no root found"
         d.resolve(false)
       else
-        console.log "admin found"
+        console.log "root found"
         d.resolve(true)
       connection.close()
   else

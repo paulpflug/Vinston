@@ -3,7 +3,7 @@ Vinston
 
 ### Install
 
-* Install node.js and mongodb
+* Install node.js, npm and mongodb 
 * Start mongodb
 * Install dependencies
 ```S

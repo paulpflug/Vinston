@@ -20,29 +20,60 @@ vinstonApp.config ['$ocLazyLoadProvider',
         asyncLoader: $script
 ]
 
-vinstonApp.config ['$routeProvider',
-  ($routeProvider) ->
-    $routeProvider.when("/",
+vinstonApp.config ["$routeProvider", ($routeProvider) ->
+    String::capitalize = ->
+      @substr(0, 1).toUpperCase() + @substr(1)
+    $routeProvider.when "/",
       templateUrl: "main.html"
       controller: 'MainCtrl'
       resolve: 
-        test: ['$ocLazyLoad',
+        loadRoute: ['$ocLazyLoad',
           ($ocLazyLoad) ->
             return $ocLazyLoad.load 
                 name: 'MainModule',
                 files: ['main.js']
         ]
-    ).when("/rooms",
-      templateUrl: "admin/rooms/rooms.html"
-      controller: "RoomsCtrl"
+    .when "/:group/:function", 
+      templateUrl: (params) ->
+        g = "/"+params.group
+        f = "/"+params.function
+        return g+f+f+".html"
       resolve: 
-        test: ['$ocLazyLoad',
-          ($ocLazyLoad) ->
-            return $ocLazyLoad.load 
-                name: 'RoomsModule',
-                files: ['admin/rooms/rooms.js']
-        ]
-    ).otherwise redirectTo: "/"
+        loadRoute: ($ocLazyLoad,$route,$q,$location,auth,toaster) ->
+            d = $q.defer()
+            params = $route.current.params
+            g = "/"+params.group
+            f = "/"+params.function
+            auth.requirePermission(params.group)
+            .then (success)->
+              if success
+                $ocLazyLoad.load 
+                  name: params.function.capitalize()+"Module",
+                  files: [g+f+f+".js"]
+                .then () -> d.resolve()
+              else
+                d.reject()
+                window.history.back()
+                toaster.pop "error", "Unauthorisiert", "Sie haben nicht die nötige Berechtigung."
+            return d.promise
+    .otherwise redirectTo: "/"
 ]
 
 
+vinstonApp.filter("isNot", () ->
+  return (array,filter,property) ->
+    if filter
+      result = []
+      for text in array
+        t = text
+        if property 
+          if t[property]
+            t = t[property]
+          if filter[property]
+            filter = filter[property]
+        if t != filter
+          result.push(text)
+      return result
+    else
+      return array
+)

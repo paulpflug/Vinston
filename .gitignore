@@ -9,3 +9,4 @@ ngapp_compiled
 npm-debug.log
 resources/images/*
 config.json
+build

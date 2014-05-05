@@ -1,20 +1,11 @@
 "use strict"
-window.socket = io.connect()
 
-angular.module("installApp",[
-  "globals"
-  "ngCookies"
-  "ngResource"
-  "ngSanitize"
-  "ngRoute"
-  "oc.lazyLoad"
-  "angular-md5"
-  "toaster"
-  "ui.bootstrap"
-])
-.controller "appCtrl", ($scope, $modal, $interval, $timeout, $q ,config,md5) ->
-  socketConfig = io.connect("/installConfig")
-  socketUsers = io.connect("/installUsers") 
+angular.module("ServerConfigModule",["oc.lazyLoad",
+   "infinite-scroll",
+   "localytics.directives", 
+   "ui.bootstrap"])
+.controller "serverConfigCtrl", ($scope, $q,md5, config) ->
+  socketConfig = io.connect("/config")
   $scope.loaded = false  
   $scope.connectionTesting = false
   $scope.connectionTested = false
@@ -22,11 +13,6 @@ angular.module("installApp",[
   $scope.connectionSaved = false
   $scope.connectionError = ""
   $scope.connectionInfo = ""
-  $scope.userSaving = false
-  $scope.userSaved = false
-  $scope.userInfo = ""
-  $scope.userName = ""
-  $scope.userPassword= ""
   $scope.testedCount = 0
   $scope.testConnection = () ->
     d = $q.defer()
@@ -72,31 +58,9 @@ angular.module("installApp",[
       d.resolve(value)
     $scope.$$phase || $scope.$apply()
     return d.promise
-  $scope.setUser = () ->
-    d = $q.defer()
-    $scope.userSaving = true
-    $scope.userSaved = false
-    user = {name: $scope.userName, password: $scope.userPassword}
-    hash = md5.createHash(angular.toJson(user))
-    socketUsers.emit "admin.set", {value: user, hash: hash}
-    socketUsers.once "admin.set."+hash, (value) ->
-      $scope.userSaved = true if value
-      $scope.userInfo = "Admin gespeichert" if value
-      $scope.userSaving = false
-      $scope.$$phase || $scope.$apply() 
-      d.resolve(value)
-    $scope.$$phase || $scope.$apply()
-    return d.promise
-  socketConfig.on "configdone", () ->
-    socketUsers = io.connect("/installUsers") 
-  socketConfig.once "done", () ->
-    console.log "test"
-    $scope.userSaved = true
-    $scope.userInfo = "Admin vorhanden"
-    $scope.$$phase || $scope.$apply() 
   # initialize
-  socketConfig.emit "mongoConnection"
-  socketConfig.once "mongoConnection.data", (data) ->
+  config.get "mongoConnection"
+  .then (data)->
     $scope.mongoConnection = data if data
     $scope.testConnection()
       .then((success) -> 

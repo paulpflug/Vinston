@@ -32,6 +32,7 @@ html.no-js
       p Wir werden jetzt die Konfiguration des Servers vorbereiten.
       i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="loaded")
       .panel(
+        ng-cloak
         ng-show="loaded"
         ng-class="{'panel-primary': !connectionSaved, 'panel-default': connectionSaved}")
         .panel-heading
@@ -69,7 +70,7 @@ html.no-js
         ng-disabled="connectionSaved"
         ng-class="{'panel-primary': connectionSaved && !userSaved, 'panel-default': !(connectionSaved && !userSaved)}")
         .panel-heading
-          h3.panel-title Admin anlegen
+          h3.panel-title Root anlegen
         .panel-body
           .col-md-5
             .input-group

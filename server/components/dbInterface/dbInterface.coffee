@@ -109,6 +109,6 @@ module.exports = {
         modelVersions.find find, fields, options, (err,data) ->
           return if err
           client.emit("history." + hash, data)
-      d.resolve()
+    d.resolve()
     return d.promise
 }

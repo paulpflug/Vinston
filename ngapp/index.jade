@@ -23,36 +23,51 @@ html.no-js
     link(rel="stylesheet" href="index.css")
     link(rel="stylesheet" href="main.css")
     // endbuild 
-  body.container(ng-app="vinstonApp",ng-controller="appCtrl",data-spy="scroll",data-target="nav.navbar")
+  body.container(ng-app="vinstonApp",ng-controller="appCtrl")
     // [if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. 
       Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
       ![endif]
-    .row.inforow
-      img.activeInstitute.left.img-rounded(ng-click="showInstitutes()"
-            ng-src="{{activeInstiute.image}}",alt="{{activeInstiute.name}}")
-      button#semesterbutton.btn.btn-default {{semesterName}}
-        p {{dauer}}
-      button#loginbutton.btn.btn-default.right(ng-click="showLogin()") Login
-      
-      
-    .row
-      nav.navbar.navbar-default(role="navigation")
-        .navbar-header
-          a.navbar-brand(href="#")
-            span Vinston
-          ul.nav.navbar-nav
+    i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="loaded")
+    #inforow.row.inforow(ng-cloak,ng-show="loaded")
+      nav.nav.nav-pills(role="navigation")
+        img.activeInstitute.left.img-rounded(ng-click="institute.showModal()"
+            ng-src="{{session.getActiveInstitute().image}}",alt="{{session.getActiveInstitute().name}}")
+        button#semesterbutton.left.btn.btn-default {{semesterName}}
+          p {{dauer}}
+        button#loginbutton.btn.btn-default.right(ng-if="!auth.getUser()",ng-click="auth.showLoginModal()") Login
+        button#userbutton.btn.btn-default.right(ng-if="auth.getUser()")
+          span Hi, {{auth.getUser().name}}
+
+        li.dropdown
+          a.dropdown-toggle(href="#",data-toggle="dropdown") Student
+            span.caret
+          ul.dropdown-menu
+            li Mein Stundenplan
+        li.dropdown(ng-if="auth.inGroup('docent')")
+          a.dropdown-toggle(href="#",data-toggle="dropdown") Dozent
+            b.caret
+          ul.dropdown-menu
+            li Mein Stundenplan
+        li.dropdown(ng-if="auth.inGroup('admin')")
+          a.dropdown-toggle(href="#",data-toggle="dropdown") Administrator
+            b.caret
+          ul.dropdown-menu
             li 
-              a(href="#") Für Studenten
+              a(href="#/admin/rooms") Räume
             li 
-              a(href="#") Für Dozenten
-            li.dropdown
-              a.dropdown-toggle(href="#",data-toggle="dropdown") Für Administratoren
-                b.caret
-              ul.dropdown-menu
-                li 
-                  a(href="#rooms") Räume
-    .row(ng-view)
+              a(href="#/admin/docents") Dozenten
+            li 
+              a(href="#/admin/structure") Struktur
+        li.dropdown(ng-if="auth.inGroup('root')")
+          a.dropdown-toggle(href="#",data-toggle="dropdown") Root
+            b.caret
+          ul.dropdown-menu
+            li 
+              a(href="#/root/serverConfig") Server konfiguration
+            li 
+              a(href="#/root/appConfig") App konfiguration
+    .row(ng-view,ng-cloak,ng-show="loaded")
     toaster-container(toaster-options="{'time-out': 3000,'position-class':'toast-bottom-right'}")
     // build:js vendor/vendor.js
     // bower:js
@@ -87,4 +102,6 @@ html.no-js
     script(src="components/globals/globals.js")
     script(src="app.js")
     script(src="index.js")
+    script(src="indexInstitutes.js")
+    script(src="indexLogin.js")
     // endbuild 

@@ -12,7 +12,8 @@ Q = require "q"
 config = require "./config.coffee"
 configInterface = require "./components/configInterface/configInterface.coffee"
 
-users = require "./admin/users/usersModel.coffee"
+users = require "./root/users/usersModel.coffee"
+authInterface = require "./components/authInterface/authInterface.coffee"
 
 models = ["./admin/rooms/roomsModel.coffee"]
 dbInterface = require "./components/dbInterface/dbInterface.coffee"
@@ -46,14 +47,15 @@ startup = () ->
       name = require(model)
       dbInterface.expose(io, name)
     expose.apply(undefined, models)
+    authInterface.expose(io,users)
   .done () -> console.log "started up"; d.resolve()
   return d.promise
 setup = (configInstalled) ->
   d = Q.defer()
   console.log "starting install"
   io = require("socket.io").listen(server)
-  rootRoute = "/admin/install/install.html"
-  installInterface = require "./admin/install/install.coffee"
+  rootRoute = "/root/install/install.html"
+  installInterface = require "./root/install/installInterface.coffee"
   installInterface.exposeInstallInterface io,config, users,configInstalled
   .then () ->  
     console.log "finished install"

@@ -7,22 +7,22 @@ exposeInstallInterface = (io, config, users, configdone) ->
   exposeUserInterface = () ->
     console.log("exposing install user interface")
     io.of("/installUsers").on "connection", (client) ->
-      client.on "admin.set", (data) ->            
+      client.on "root.set", (data) ->            
         if (data and data.value and data.hash and data.value.name and data.value.password)
-          data.value.group = "admin"
+          data.value.group = "root"
           config.getDBconnection()
           .then (conn) ->
             user = users.loadModel(conn)
-            admin = new user(data.value)
-            admin.save (err) ->
+            root = new user(data.value)
+            root.save (err) ->
               if err
                 console.log err
-                client.emit "admin.set." + data.hash, false
+                client.emit "root.set." + data.hash, false
                 return
-              client.emit "admin.set." + data.hash, true
+              client.emit "root.set." + data.hash, true
               d.resolve()
         else
-          client.emit "admin.set." + data.hash, false                                    
+          client.emit "root.set." + data.hash, false                                    
     console.log("Install user interface exposed")
 
   console.log("exposing install config interface")
@@ -35,10 +35,10 @@ exposeInstallInterface = (io, config, users, configdone) ->
         client.on key, () ->
           client.emit key + ".data", config.nconf.get(key)
         # tester
-        if value.initialTest
+        if value.test
           client.on key + ".test", (data) ->
             if (data and data.value and data.hash)
-              value.initialTest(data.value).then(
+              value.test(data.value).then(
                 ((info) -> client.emit key + ".test." + data.hash, {success:true,info:info}),
                 ((err) -> client.emit key + ".test." + data.hash, {success:false,err:err})
                 )

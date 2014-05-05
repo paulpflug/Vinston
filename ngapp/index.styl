@@ -1,3 +1,6 @@
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
 .single-chosen
   width 180px
 .multiple-chosen
@@ -21,17 +24,21 @@ a.chosen-single>span
   height:55px
   width:auto
   cursor: pointer
-.inforow
+#inforow
   margin-bottom 10px
 .left
   float: left
 .right
   float: right
-#semesterbutton,
-#loginbutton
+#inforow button
   height: 55px
   width 180px
-#semesterbutton
-  margin-left 10px
+#inforow > nav > img + button,
+#inforow > nav > button + button
+  margin-left 2px
 .ng-dirty
   border-width 2px !important
+#inforow .nav-pills > li
+  float: right
+#inforow .nav-pills > li > a  
+  padding: 18px 15px 17px 15px

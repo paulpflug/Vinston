@@ -9,11 +9,9 @@ schema = {
     type: "objects"
     permissions:
       get:
-        admin: []
-        docent: []
-        student: []
+        all: []
       set:
-        admin: []
+        root: []
     initial: false
 }
 
@@ -21,11 +19,11 @@ schema[connectionStringKey] = {
   type: "string"
   permissions:
     get:
-      admin: []
+      root: []
     set:
-      admin: []
+      root: []
   initial: true
-  initialTest: (data) ->   
+  test: (data) ->   
     options = { server: { auto_reconnect:false, socketOptions: { connectTimeoutMS: 500 }}}
     conn =  mongoose.createConnection data, options
     d = Q.defer() 
@@ -59,8 +57,8 @@ checkForInstalled = () ->
     if v and v.initial
       if not nconf.get(k)
         reject()
-      else if v.initialTest
-        tests.push(v.initialTest(nconf.get(k)))
+      else if v.test
+        tests.push(v.test(nconf.get(k)))
   if not rejected
     if tests.length > 0
       Q.all tests
@@ -80,10 +78,51 @@ getDBconnection = () ->
     d.reject("no connection string configured")
   return d.promise
 
+filterByPermission = (obj,keys) ->
+  newObj = {}
+  for key in keys
+    newObj[key] = obj[key]
+  return newObj
+
+getByPermission = (key, permission) ->
+  response = false
+  if permission
+    data = nconf.get(key)
+    if data
+      type = schema[key].type
+      if (type == "objects" or type == "object") and permission.length>0
+        if (type == "objects")
+          newData = []
+          for d in data
+            newData.push(filterByPermission(d,permission))
+        else
+          newData = filterByPermission(data,permission)
+        data = newData
+      response = data  
+  return response
+setByPermission = (key, data, permission) ->
+  response = false
+  if permission
+    type = schema[key].type
+    if (type == "objects" or type == "object") and permission.length>0
+      if (type == "objects")
+        newData = []
+        for d in data
+          newData.push(filterByPermission(d,permission))
+      else
+        newData = filterByPermission(data,permission)
+      data = newData
+    nconf.set(key,data)
+    nconf.save()
+    response = true  
+  return response
+
 module.exports = {
   nconf: nconf
   checkForInstalled: checkForInstalled
   schema: schema
   connectionStringKey: connectionStringKey
   getDBconnection: getDBconnection
+  getByPermission: getByPermission
+  setByPermission: setByPermission
 }

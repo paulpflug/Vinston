@@ -6,11 +6,12 @@
       .input-group(style="margin-bottom: 25px")
         span.input-group-addon
           i.glyphicon.glyphicon-user
-        input.form-control(type="text" placeholder="Name")   
+        input.form-control(type="text", placeholder="Name", ng-model="user.name")   
       .input-group(style="margin-bottom: 25px")                                     
         span.input-group-addon
           i.glyphicon.glyphicon-lock
-        input.form-control(type="password" placeholder="Passwort") 
+        input.form-control(type="password", placeholder="Passwort",ng-model="user.password") 
       .input-group                       
-        button.btn.btn-primary Login
+        button.btn.btn-primary(ng-click="login()",ng-disabled="loginIn || !user.password || !user.name") Login 
           i.fa.fa-spinner.fa-spin(ng-show="loginIn")
+        span.label.label-danger(ng-show="error",style="margin-left:20px") {{error}}
