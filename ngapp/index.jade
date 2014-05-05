@@ -43,12 +43,24 @@ html.no-js
           a.dropdown-toggle(href="#",data-toggle="dropdown") Student
             span.caret
           ul.dropdown-menu
-            li Mein Stundenplan
+            li
+              a(href="#/student/main") Mein Stundenplan
+            li
+              a(href="#/student/bookRoom") Raum buchen
+            li
+              a(href="#/all/freeRoom") Freien Raum finden
+            li
+              a(href="#/all/vlvz") Vorlesungsverzeichnis
         li.dropdown(ng-if="auth.inGroup('docent')")
           a.dropdown-toggle(href="#",data-toggle="dropdown") Dozent
             b.caret
           ul.dropdown-menu
-            li Mein Stundenplan
+            li
+              a(href="#/docent/main") Mein Stundenplan
+            li
+              a(href="#/student/bookRoom") Raum buchen
+            li
+              a(href="#/docent/registration") Zumeldung
         li.dropdown(ng-if="auth.inGroup('admin')")
           a.dropdown-toggle(href="#",data-toggle="dropdown") Administrator
             b.caret
@@ -64,9 +76,20 @@ html.no-js
             b.caret
           ul.dropdown-menu
             li 
-              a(href="#/root/serverConfig") Server konfiguration
+              a(href="#/root/helpUser") Benutzer helfen
+            li 
+              a(href="#/root/planning") Planung
+            li 
+              a(href="#/root/his") HIS export
+            li 
+              a(href="#/root/import") Datenbank import
+            li 
+              a(href="#/root/users") Benutzer verwalten
             li 
               a(href="#/root/appConfig") App konfiguration
+            li 
+              a(href="#/root/serverConfig") Server konfiguration
+            
     .row(ng-view,ng-cloak,ng-show="loaded")
     toaster-container(toaster-options="{'time-out': 3000,'position-class':'toast-bottom-right'}")
     // build:js vendor/vendor.js
