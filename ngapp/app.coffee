@@ -27,12 +27,13 @@ vinstonApp.config ["$routeProvider", ($routeProvider) ->
       templateUrl: "main.html"
       controller: 'MainCtrl'
       resolve: 
-        loadRoute: ['$ocLazyLoad',
-          ($ocLazyLoad) ->
+        tokenAuth: (auth) ->
+            return auth.tokenLogin()
+        loadRoute: ($ocLazyLoad) ->
             return $ocLazyLoad.load 
                 name: 'MainModule',
                 files: ['main.js']
-        ]
+
     .when "/:group/:function", 
       templateUrl: (params) ->
         g = "/"+params.group
@@ -47,6 +48,7 @@ vinstonApp.config ["$routeProvider", ($routeProvider) ->
             auth.requirePermission(params.group)
             .then (success)->
               if success
+                
                 $ocLazyLoad.load 
                   name: params.function.capitalize()+"Module",
                   files: [g+f+f+".js"]

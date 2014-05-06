@@ -27,6 +27,7 @@ if process.env.dirname
   dir = process.env.dirname
 else
   dir = path.join(__dirname,"..")
+app.use(require("prerender-node"))
 ## setting dynamic routes
 rootRoute = "/index.html"
 app.route("/").get (req,res) -> res.sendfile(path.join(dir,"ngapp_compiled")+rootRoute)

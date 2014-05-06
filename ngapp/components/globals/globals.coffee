@@ -24,21 +24,24 @@ mod.service "auth", ($rootScope,$q,$modal,md5,session) ->
   groups = ["all","student","docent","admin","root"] 
   this.tokenLogin = () ->
     d = $q.defer()
-    token = session.getToken()
-    if token
-      hash = md5.createHash(angular.toJson(token))
-      item = {token: token, hash: hash}
-      socket.emit "auth.byToken", item
-      socket.once "auth.byToken."+hash, (result) ->
-        if result and result.name and result.group
-          user = {name:result.name,group:result.group}
-          session.setUserName(result.name)
-          d.resolve(user)
-        else
-          session.setToken("false")
-          d.resolve(false)
+    if not user
+      token = session.getToken()
+      if token
+        hash = md5.createHash(angular.toJson(token))
+        item = {token: token, hash: hash}
+        socket.emit "auth.byToken", item
+        socket.once "auth.byToken."+hash, (result) ->
+          if result and result.name and result.group
+            user = {name:result.name,group:result.group}
+            session.setUserName(result.name)
+            d.resolve(user)
+          else
+            session.setToken("false")
+            d.resolve(false)
+      else
+        d.resolve(false)
     else
-      d.resolve(false)
+      d.resolve(user)
     return d.promise
   this.setUser = (newUser) ->
     d = $q.defer()
@@ -81,16 +84,19 @@ mod.service "auth", ($rootScope,$q,$modal,md5,session) ->
 
   this.requirePermission = (group,staticModal) ->
     d = $q.defer()
-    if (user and user.group)
-      d.resolve(inGroup(group))
+    if group == "all"
+      d.resolve(true)
     else
-      this.tokenLogin()
-      .then (success) ->
-        if success
-          d.resolve(inGroup(group))
-        else
-          showLoginModal(staticModal)
-          .then (()->d.resolve(inGroup(group))), ()->d.resolve(false)
+      if (user and user.group)
+        d.resolve(inGroup(group))
+      else
+        this.tokenLogin()
+        .then (success) ->
+          if success
+            d.resolve(inGroup(group))
+          else
+            showLoginModal(staticModal)
+            .then (()->d.resolve(inGroup(group))), ()->d.resolve(false)
     return d.promise
 
   inGroup = (group) ->

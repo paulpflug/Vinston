@@ -21,7 +21,7 @@
     "angular-chosen-localytics": "~1.0.5",
     "chosen": "https://github.com/harvesthq/chosen/releases/download/v1.1.0/chosen_v1.1.0.zip",
     "angular-md5": "~0.1.7",
-    "AngularJS-Toaster": "~0.4.4",
+    "AngularJS-Toaster": "~0.4.6",
     "deep-diff": "~0.1.7",
     "lodash": "~2.4.1",
     "font-awesome": "~4.0.3"

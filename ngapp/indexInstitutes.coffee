@@ -12,7 +12,7 @@ angular.module("vinstonApp")
       .then (success) ->
         console.log(success)
         if success
-          $location.path("/admin/config")
+          $location.path("/root/appConfig")
           $modalInstance.close()
         else
           window.location = "401.html"

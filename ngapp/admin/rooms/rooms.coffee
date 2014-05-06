@@ -2,9 +2,8 @@
 
 angular.module("RoomsModule",["oc.lazyLoad",
    "infinite-scroll",
-   "localytics.directives", 
-   "ui.bootstrap"])
-.controller("RoomsCtrl", ($scope, $filter, $modal, socketData, config) ->
+   "localytics.directives"])
+.controller("roomsCtrl", ($scope, $filter, $modal, socketData, config) ->
   $scope.institutes = []
   config.get("institutes").then (data) ->
      $scope.institutes = data

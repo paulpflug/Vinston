@@ -1,69 +1,33 @@
 "use strict"
 
-angular.module("AppConfigModule",["oc.lazyLoad",
-   "infinite-scroll",
-   "localytics.directives", 
-   "ui.bootstrap"])
-.controller "appConfigCtrl", ($scope, $q,md5, config) ->
-  socketConfig = io.connect("/config")
+angular.module("AppConfigModule",["oc.lazyLoad"])
+.controller "appConfigCtrl", ($scope, $q,md5, config,toaster) ->
+  setInstitutesActive = (newValue, oldValue) ->
+    if newValue != oldValue
+      $scope.active = "institutes"
+  ready = () ->
+    $scope.$watch("active =='institutes' ? true : institute.filter", setInstitutesActive, true)
+    $scope.$watch("active =='institutes' ? true : institutes", setInstitutesActive, true)
+    $scope.loaded = true
   $scope.loaded = false  
-  $scope.connectionTesting = false
-  $scope.connectionTested = false
-  $scope.connectionSaving = false
-  $scope.connectionSaved = false
-  $scope.connectionError = ""
-  $scope.connectionInfo = ""
-  $scope.testedCount = 0
-  $scope.testConnection = () ->
-    d = $q.defer()
-    $scope.testedCount++
-    testedCount = $scope.testedCount
-    $scope.connectionTested = false
-    $scope.connectionSaved = false
-    $scope.userSaved = false
-    if $scope.mongoConnection      
-      hash = md5.createHash($scope.mongoConnection)
-      $scope.connectionTesting = true
-      socketConfig.emit "mongoConnection.test", {value: $scope.mongoConnection, hash: hash}    
-      socketConfig.once "mongoConnection.test."+hash, (data) ->
-        if data 
-          if testedCount == $scope.testedCount
-            $scope.connectionInfo = ""
-            $scope.connectionError = ""
-            if data.success and data.info 
-              $scope.connectionTested = true
-              $scope.connectionInfo = data.info
-            if not data.success and data.err
-              $scope.connectionError = data.err
-            $scope.connectionTesting = false
-            $scope.$$phase || $scope.$apply()
-          d.resolve(data.success)
-      $scope.$$phase || $scope.$apply()
-    else
-      d.resolve()
-    return d.promise
-  $scope.setConnection = () ->
-    d = $q.defer()
-    $scope.connectionSaving = true
-    $scope.connectionSaved = false
-    hash = md5.createHash($scope.mongoConnection)
-    socketConfig.emit "mongoConnection.set", {value: $scope.mongoConnection, hash: hash}
-    socketConfig.once "mongoConnection.set."+hash, (value) ->
-      if value
-        $scope.connectionSaved = true
-      else
-        $scope.connectionTested = false
-      $scope.connectionSaving = false
-      $scope.$$phase || $scope.$apply() 
-      d.resolve(value)
-    $scope.$$phase || $scope.$apply()
-    return d.promise
-  # initialize
-  config.get "mongoConnection"
-  .then (data)->
-    $scope.mongoConnection = data if data
-    $scope.testConnection()
-      .then((success) -> 
-        $scope.connectionSaved = true if (success)
-        $scope.loaded = true
-        $scope.$$phase || $scope.$apply())
+  $scope.active = ""
+  $scope.institute.filter = {}
+  $scope.institute.disabled = false
+  config.get("institutes").then (institutes) ->
+    $scope.institutes = institutes    
+    $scope.$$phase || $scope.$digest()
+    ready()
+  $scope.setChanged = (obj) ->
+    obj.changed = true
+  $scope.testImg = (obj) ->
+    $scope.setChanged(obj)
+    img = new Image()
+    obj.status = "loading"
+    $scope.$$phase || $scope.$digest()
+    img.addEventListener 'error', () ->
+      obj.status = "err"
+      $scope.$$phase || $scope.$digest()
+    img.addEventListener 'load', () ->
+      obj.status = "success"
+      $scope.$$phase || $scope.$digest()
+    img.src = obj.image

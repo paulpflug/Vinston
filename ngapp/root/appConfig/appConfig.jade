@@ -1,35 +1,92 @@
 #config(ng-controller="appConfigCtrl" 
   ng-cloak
-  ng-show="loaded")
-  .panel(
-    ng-class="{'panel-primary': !connectionSaved, 'panel-default': connectionSaved}")
+  )
+  i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="loaded")
+  .panel(ng-show="loaded"
+    ng-class="{'panel-primary': active == 'institutes', 'panel-default': active != 'institutes'}")
     .panel-heading
-      h3.panel-title Datenbank einrichten
+      h3.panel-title Institute einrichten
     .panel-body
-      form(
-          name="connectionForm"
-          ng-class="{'has-success':connectionTested && !connectionSaved, 'has-error':!connectionTested&&connectionForm.connectionString.$dirty &&  !connectionSaved}")
-        .col-md-10.input-addon
-          input.form-control(
-              ng-disabled="userSaved"
-              ng-model="mongoConnection"
-              name="connectionString"
-              placeholder="mongodb Verbindung (z.b. mongodb://localhost/Vinston )"
-              ng-change="testConnection()")
-          i.fa.fa-spinner.fa-spin(ng-show="connectionTesting")
-        .col-md-2 
-          button.btn(
-            ng-class="{'btn-primary': !connectionSaved, 'btn-default': connectionSaved}"
-            ng-click="setConnection()"
-            ng-disabled="!connectionTested || connectionSaving ||connectionSaved") 
-            span.glyphicon(
-              ng-class="{'glyphicon-save': !connectionSaved, 'glyphicon-ok': connectionSaved}"
-              ng-show="!connectionSaving")
-            i.fa.fa-spinner.fa-spin(ng-show="connectionSaving")
-            span {{connectionSaved ? " Ok":" Speichern"}} 
-      span.label.label-danger(ng-show="connectionError") {{connectionError}}
-      span.label.label-info(ng-show="connectionInfo") {{connectionInfo}}
-      a.col-md-12(
-        target="_blank"
-        href="http://mongoosejs.com/docs/api.html#index_Mongoose-createConnection")
-        span Mongoose URI Dokumentation
+      table.table.table-striped
+        tr(ng-disabled="institute.disabled")
+          td 
+            input.form-control(
+              ng-model="institute.filter.name"
+              placeholder="Name"
+              )
+          td 
+            input.form-control(
+              ng-model="institute.filter.longName"
+              placeholder="Langer Name"
+              )
+          td 
+            input.form-control(
+              ng-model="institute.filter.affiliation"
+              placeholder="Zugehörigkeit"
+              )
+          td.input-addon(ng-class="{'danger': institute.filter.status=='err', 'success': institute.filter.status=='success'}")
+            input.form-control(
+              ng-model="institute.filter.image"
+              placeholder="Bild"
+              ng-change="testImg(institute.filter)"
+              )
+            i.fa.fa-spinner.fa-spin(ng-show="institute.filter.status=='loading'")
+            img(ng-if="institute.filter.status=='success'" ng-src="{{institute.filter.image}}")
+          td
+            .checkbox
+              label
+                input(type="checkbox",ng-model="institute.filter.planning", ng-true-value="true", ng-false-value="false")
+                span Planung
+          td
+            button.btn(ng-click="institute.insert()") 
+              span.glyphicon.glyphicon-import
+          td
+        tr(ng-repeat="inst in institutes | filter:institute.filter:strict"
+          ng-class="{'warning': inst.changed}"
+          ng-disabled="inst.disabled"
+          )
+          td 
+            input.form-control(
+              ng-model="inst.name"
+              placeholder="Name"
+              ng-change="setChanged(inst)")
+          td 
+            input.form-control(
+              ng-model="inst.longName"
+              placeholder="Langer Name"
+              ng-change="setChanged(inst)")
+          td 
+            input.form-control(
+              ng-model="inst.affiliation"
+              placeholder="Zugehörigkeit"
+              ng-change="setChanged(inst)")
+          td.input-addon(ng-class="{'danger': inst.status=='err', 'success': inst.status=='success'}")
+            input.form-control(
+              ng-model="inst.image"
+              placeholder="Bild"
+              ng-change="testImg(inst)"
+              )
+            i.fa.fa-spinner.fa-spin(ng-show="inst.status=='loading'")
+            img(ng-if="inst.image && (!inst.status ||inst.status=='success')" ng-src="{{inst.image}}")
+          td
+            .checkbox
+              label
+                input(type="checkbox", ng-model="inst.planning", ng-true-value="true", ng-false-value="false")
+                span Planung
+          td
+            button.btn(ng-click="update(inst)"
+              ng-show="inst.changed") 
+              span.glyphicon.glyphicon-save
+            button.btn(ng-click="remove(inst)") 
+              span.glyphicon.glyphicon-remove
+
+  .panel(ng-show="loaded"
+    ng-class="{'panel-primary': active == 'semesters', 'panel-default': active != 'semesters'}")
+    .panel-heading
+      h3.panel-title Semester einrichten
+    .panel-body
+  .panel(ng-show="loaded"
+    ng-class="{'panel-primary': active == 'formular', 'panel-default': active != 'formular'}")
+    .panel-heading
+      h3.panel-title Formular einrichten
+    .panel-body

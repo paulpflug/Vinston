@@ -95,6 +95,7 @@ module.exports = (grunt) ->
         opts: ['node_modules/coffee-script/bin/coffee']
       dev:
         options:
+          debug: true
           script: "server/server.coffee"
 
     

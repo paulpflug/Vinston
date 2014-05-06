@@ -59,6 +59,7 @@ module.exports =
           if storedItem
             if storedItem.removeTimeout
               storedItem.removeTimeout()
+            storedItem.resetLongTimeout()
             user = storedItem.user
             response = {name:user.name,group:user.group,token:token}
             client.handshake.user = user
@@ -76,11 +77,11 @@ module.exports =
                   token = buf.toString "base64"
                   response = {name:user.name,group:user.group,token:token}
                   tokenStore[token] = {user:user}
-                  timoutObj = setTimeout (() -> delete tokenStore[token]), tokenExpiration*10
-                  if tokenStore[token].removeTimeout
-                    tokenStore[token].removeTimeout() 
-                  tokenStore[token].removeTimeout = () ->
-                    clearTimeout(timoutObj)
+                  tokenStore[token].resetLongTimeout = () ->
+                    if timoutObj
+                      clearTimeout(timoutObj)
+                    timoutObj = setTimeout (() -> delete tokenStore[token]), tokenExpiration*50
+                  tokenStore[token].resetLongTimeout()
                   client.handshake.user = user
                   client.handshake.token = token
                   client.emit "auth."+item.hash, response
