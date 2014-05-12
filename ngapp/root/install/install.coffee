@@ -12,7 +12,7 @@ angular.module("installApp",[
   "toaster"
   "ui.bootstrap"
 ])
-.controller "appCtrl", ($scope, $modal, $interval, $timeout, $q ,config,md5) ->
+.controller "appCtrl", ($scope, $modal, $interval, $timeout, $q ,config,generate) ->
   socketConfig = io.connect("/installConfig")
   socketUsers = io.connect("/installUsers") 
   $scope.loaded = false  
@@ -36,22 +36,22 @@ angular.module("installApp",[
     $scope.connectionSaved = false
     $scope.userSaved = false
     if $scope.mongoConnection      
-      hash = md5.createHash($scope.mongoConnection)
+      token = generate.token()
       $scope.connectionTesting = true
-      socketConfig.emit "mongoConnection.test", {value: $scope.mongoConnection, hash: hash}    
-      socketConfig.once "mongoConnection.test."+hash, (data) ->
-        if data 
+      socketConfig.emit "mongoConnection.test", {content: $scope.mongoConnection, token: token}    
+      socketConfig.once "mongoConnection.test." + token, (response) ->
+        if response and response.content 
           if testedCount == $scope.testedCount
             $scope.connectionInfo = ""
             $scope.connectionError = ""
-            if data.success and data.info 
+            if response.success
               $scope.connectionTested = true
-              $scope.connectionInfo = data.info
-            if not data.success and data.err
-              $scope.connectionError = data.err
+              $scope.connectionInfo = response.content
+            else
+              $scope.connectionError = response.content
             $scope.connectionTesting = false
             $scope.$$phase || $scope.$apply()
-          d.resolve(data.success)
+          d.resolve(response.success)
       $scope.$$phase || $scope.$apply()
     else
       d.resolve()
@@ -60,16 +60,16 @@ angular.module("installApp",[
     d = $q.defer()
     $scope.connectionSaving = true
     $scope.connectionSaved = false
-    hash = md5.createHash($scope.mongoConnection)
-    socketConfig.emit "mongoConnection.set", {value: $scope.mongoConnection, hash: hash}
-    socketConfig.once "mongoConnection.set."+hash, (value) ->
-      if value
+    token = generate.token()
+    socketConfig.emit "mongoConnection.set", {content: $scope.mongoConnection, token: token}
+    socketConfig.once "mongoConnection.set." + token, (response) ->
+      if response.success
         $scope.connectionSaved = true
       else
         $scope.connectionTested = false
       $scope.connectionSaving = false
       $scope.$$phase || $scope.$apply() 
-      d.resolve(value)
+      d.resolve(response)
     $scope.$$phase || $scope.$apply()
     return d.promise
   $scope.setUser = () ->
@@ -77,9 +77,9 @@ angular.module("installApp",[
     $scope.userSaving = true
     $scope.userSaved = false
     user = {name: $scope.userName, password: $scope.userPassword}
-    hash = md5.createHash(angular.toJson(user))
-    socketUsers.emit "root.set", {value: user, hash: hash}
-    socketUsers.once "root.set."+hash, (value) ->
+    token = generate.token()
+    socketUsers.emit "root.set", {value: user, token: token}
+    socketUsers.once "root.set." + token, (value) ->
       $scope.userSaved = true if value
       $scope.userInfo = "Root gespeichert" if value
       $scope.userSaving = false
@@ -90,16 +90,17 @@ angular.module("installApp",[
   socketConfig.on "configdone", () ->
     socketUsers = io.connect("/installUsers") 
   socketConfig.once "done", () ->
-    console.log "test"
     $scope.userSaved = true
     $scope.userInfo = "Root vorhanden"
     $scope.$$phase || $scope.$apply() 
   # initialize
-  socketConfig.emit "mongoConnection"
-  socketConfig.once "mongoConnection.data", (data) ->
-    $scope.mongoConnection = data if data
-    $scope.testConnection()
-      .then((success) -> 
-        $scope.connectionSaved = true if (success)
-        $scope.loaded = true
-        $scope.$$phase || $scope.$apply())
+  token = generate.token()
+  socketConfig.emit "mongoConnection.get", {token:token}
+  socketConfig.once "mongoConnection.get." + token, (response) ->
+    if response.success
+      $scope.mongoConnection = response.content
+      $scope.testConnection()
+        .then((success) -> 
+          $scope.connectionSaved = true if (success)
+          $scope.loaded = true
+          $scope.$$phase || $scope.$apply())

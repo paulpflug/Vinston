@@ -106,7 +106,7 @@ filterByPermission = (obj,keys) ->
 get = (key) ->
   success = false
   content = nconf.get(key)
-  if content
+  if content or schema[key]
     success = true
   return {success:success,content:content}
 

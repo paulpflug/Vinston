@@ -26,7 +26,7 @@ angular.module('configData', []).factory "configData", ($rootScope,$filter,$q,cl
       if results.length == 2 and results[0].success and results[1].success
         factory.data = results[0].content
         factory.type = results[1].content
-        if factory.type == "objects"
+        if factory.type == "objects" and factory.data
           for item in factory.data
             item[factory.options.idOfItem] = generate.id()
           factory.unchangedData = _.cloneDeep(factory.data)

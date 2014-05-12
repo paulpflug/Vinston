@@ -4,16 +4,15 @@ angular.module("vinstonApp")
   $scope.ready = false
   $scope.activeInstitute = activeInstitute
   config.get("institutes").then (response) ->
-    if response.success
+    if response.success and response.content
       $scope.institutes = response.content 
       $scope.ready = true
     else
       auth.requirePermission("root",true)
       .then (success) ->
-        console.log(success)
         if success
           $location.path("/root/appConfig")
-          $modalInstance.close()
+          $modalInstance.dismiss()
         else
           window.location = "401.html"
   $scope.setInstitute = (inst) -> 

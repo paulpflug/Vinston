@@ -253,13 +253,15 @@ mod.service "institute", ($rootScope,$q,$modal,md5,session) ->
 
 mod.service "session", ($rootScope,$cookieStore) ->
   activeInstitute = $cookieStore.get("activeInstitute")
+  activeInstitute = "" if not activeInstitute
   user = $cookieStore.get("user")
+  user = {} if not user
   this.setActiveInstitute = (institute) ->
     activeInstitute = {name: institute.name, image: institute.image}
     $cookieStore.put("activeInstitute", institute)
     $rootScope.$$phase || $rootScope.$apply() 
   this.getActiveInstitute = () ->
-    return activeInstitute  
+    return activeInstitute
   this.setUser = (newUser) ->
     $cookieStore.put("user", newUser)
     user = newUser
