@@ -3,9 +3,9 @@ angular.module("vinstonApp")
   $scope.institutes = []
   $scope.ready = false
   $scope.activeInstitute = activeInstitute
-  config.get("institutes").then (data) ->
-    if data
-      $scope.institutes = data 
+  config.get("institutes").then (response) ->
+    if response.success
+      $scope.institutes = response.content 
       $scope.ready = true
     else
       auth.requirePermission("root",true)

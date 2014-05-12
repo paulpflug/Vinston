@@ -1,6 +1,6 @@
 # Generated on 2014-03-03 using generator-angular 0.7.1
 "use strict"
-
+path = require "path"
 # # Globbing
 # for performance reasons we're only matching one level down:
 # 'test/spec/{,*/}*.js'
@@ -21,7 +21,7 @@ module.exports = (grunt) ->
     yeoman:
       
       # configurable paths
-      app: require("./bower.json").appPath or "app"
+      app: require("./bower.json").appPath or "ngapp"
       dist: "dist"
       livereload: 35729
       
@@ -61,11 +61,20 @@ module.exports = (grunt) ->
           spawn: false
           atBegin: true
     jade: 
+      options:
+        basedir: "<%= yeoman.app %>"
+        data: (dest,src) ->
+          json = src[0].replace(/.jade/i,".json")
+          if grunt.file.exists(json)
+            console.log "found "+json
+            return grunt.file.readJSON(json) 
+          else
+            return false
       compile: 
         files: [
           expand: true,
           cwd: 'ngapp/',
-          src: '**/*.jade',
+          src: ['**/*.jade',"!components/mixins/*.jade"],
           ext: ".html",
           dest: 'ngapp_compiled/'          
         ]

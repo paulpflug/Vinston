@@ -1,92 +1,95 @@
+include /components/mixins/tdmixins.jade
+include /components/mixins/buttons.jade
+include /components/mixins/panel.jade
+include /components/mixins/form.jade
+link(rel='stylesheet', href='/root/appConfig/appConfig.css')
 #config(ng-controller="appConfigCtrl" 
   ng-cloak
   )
   i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="loaded")
-  .panel(ng-show="loaded"
-    ng-class="{'panel-primary': active == 'institutes', 'panel-default': active != 'institutes'}")
-    .panel-heading
-      h3.panel-title Institute einrichten
-    .panel-body
-      table.table.table-striped
-        tr(ng-disabled="institute.disabled")
-          td 
-            input.form-control(
-              ng-model="institute.filter.name"
-              placeholder="Name"
-              )
-          td 
-            input.form-control(
-              ng-model="institute.filter.longName"
-              placeholder="Langer Name"
-              )
-          td 
-            input.form-control(
-              ng-model="institute.filter.affiliation"
-              placeholder="Zugehörigkeit"
-              )
-          td.input-addon(ng-class="{'danger': institute.filter.status=='err', 'success': institute.filter.status=='success'}")
-            input.form-control(
-              ng-model="institute.filter.image"
-              placeholder="Bild"
-              ng-change="testImg(institute.filter)"
-              )
-            i.fa.fa-spinner.fa-spin(ng-show="institute.filter.status=='loading'")
-            img(ng-if="institute.filter.status=='success'" ng-src="{{institute.filter.image}}")
-          td
-            .checkbox
-              label
-                input(type="checkbox",ng-model="institute.filter.planning", ng-true-value="true", ng-false-value="false")
-                span Planung
-          td
-            button.btn(ng-click="institute.insert()") 
-              span.glyphicon.glyphicon-import
-          td
-        tr(ng-repeat="inst in institutes | filter:institute.filter:strict"
-          ng-class="{'warning': inst.changed}"
-          ng-disabled="inst.disabled"
-          )
-          td 
-            input.form-control(
-              ng-model="inst.name"
-              placeholder="Name"
-              ng-change="setChanged(inst)")
-          td 
-            input.form-control(
-              ng-model="inst.longName"
-              placeholder="Langer Name"
-              ng-change="setChanged(inst)")
-          td 
-            input.form-control(
-              ng-model="inst.affiliation"
-              placeholder="Zugehörigkeit"
-              ng-change="setChanged(inst)")
-          td.input-addon(ng-class="{'danger': inst.status=='err', 'success': inst.status=='success'}")
-            input.form-control(
-              ng-model="inst.image"
-              placeholder="Bild"
-              ng-change="testImg(inst)"
-              )
-            i.fa.fa-spinner.fa-spin(ng-show="inst.status=='loading'")
-            img(ng-if="inst.image && (!inst.status ||inst.status=='success')" ng-src="{{inst.image}}")
-          td
-            .checkbox
-              label
-                input(type="checkbox", ng-model="inst.planning", ng-true-value="true", ng-false-value="false")
-                span Planung
-          td
-            button.btn(ng-click="update(inst)"
-              ng-show="inst.changed") 
-              span.glyphicon.glyphicon-save
-            button.btn(ng-click="remove(inst)") 
-              span.glyphicon.glyphicon-remove
-
-  .panel(ng-show="loaded"
-    ng-class="{'panel-primary': active == 'semesters', 'panel-default': active != 'semesters'}")
-    .panel-heading
-      h3.panel-title Semester einrichten
-    .panel-body
-  .panel(ng-show="loaded"
-    ng-class="{'panel-primary': active == 'formular', 'panel-default': active != 'formular'}")
-    .panel-heading
-      h3.panel-title Formular einrichten
-    .panel-body
+  +panel("Institute einrichten","active == 'institutes'","active != 'institutes'")
+    table.table.table-striped
+      tr(ng-disabled="institutes.filter.busy")
+        td
+          +input("institutes.filter."+institutes[0].name,institutes[0].pretty)
+          +inputCheckbox("institutes.filter."+institutes[1].name,institutes[1].pretty)
+        td
+          +input("institutes.filter."+institutes[2].name,institutes[2].pretty)
+          +input("institutes.filter."+institutes[3].name,institutes[3].pretty)
+        +tdInputImg("institutes.filter."+institutes[4].name,
+          institutes[4].pretty,
+          "institutes.filter.status",
+          "testImg(institutes.filter)")
+        td
+          +button("institutes.insert()","import","institutes.filter."+institutes[0].name,undefined,"Hinzufügen")     
+      tr(ng-repeat="inst in institutes.data | filter:institutes.filter:strict"
+        ng-class="{'warning': inst.changed}")
+        td
+          +input("inst."+institutes[0].name,institutes[0].pretty,"institutes.setChanged(inst)")
+          +inputCheckbox("inst."+institutes[1].name,institutes[1].pretty,"institutes.setChanged(inst)")
+        td
+          +input("inst."+institutes[2].name,institutes[2].pretty,"institutes.setChanged(inst)")
+          +input("inst."+institutes[3].name,institutes[3].pretty,"institutes.setChanged(inst)")
+        +tdInputImg("inst."+institutes[4].name,
+          institutes[4].pretty,
+          "inst.status",
+          "testImg(inst)")        
+        td(ng-disabled="inst.busy")
+          +button("institutes.save(inst)","save","inst.changed",undefined,"Speichern") 
+          +button("institutes.unchange(inst)","refresh","inst.changed",undefined,"Rückgängig")
+          +button("institutes.delete(inst)","remove","!inst.changed",undefined,"Löschen") 
+  +panel("Semester einrichten","active == 'semesters'","active != 'semesters'")
+    table.table.table-striped
+      tr(ng-disabled="semester.disabled")
+        td
+          +input("semester.filter."+semesters[0].name,semesters[0].pretty)
+          +inputCheckbox("semester.filter."+semesters[6].name,semesters[6].pretty)
+        td
+          +inputDate(
+            "semester.filter."+semesters[1].name,
+            semesters[1].pretty,undefined,undefined,"false")
+          +inputDate(
+            "semester.filter."+semesters[2].name,
+            semesters[2].pretty,undefined,undefined,"false")
+        td
+          +inputDate(
+            "semester.filter."+semesters[3].name,
+            semesters[3].pretty,undefined,undefined,"false")
+          +inputDate(
+            "semester.filter."+semesters[4].name,
+            semesters[4].pretty,undefined,undefined,"false")
+        td
+          +inputDate(
+            "semester.filter."+semesters[5].name,
+            semesters[5].pretty,undefined,undefined,"false")
+        td
+          +button("semester.insert()","import","semester.filter."+semesters[0].name)  
+      tr(ng-repeat="sem in semesters | filter:semester.filter:strict"
+        ng-class="{'warning': sem.changed}"
+        ng-disabled="sem.disabled"
+        )
+        td
+          +input("sem."+semesters[0].name,semesters[0].pretty)
+          +inputCheckbox("sem."+semesters[6].name,semesters[6].pretty)
+        td
+          +inputDate(
+            "sem."+semesters[1].name,
+            semesters[1].pretty,undefined,"","false")
+          +inputDate(
+            "sem."+semesters[2].name,
+            semesters[2].pretty,"","","false")
+        td
+          +inputDate(
+            "sem."+semesters[3].name,
+            semesters[3].pretty,"","","false")
+          +inputDate(
+            "sem."+semesters[4].name,
+            semesters[4].pretty,"","","false")
+        td
+          +inputDate(
+            "sem."+semesters[5].name,
+            semesters[5].pretty,"","","false")
+        td
+          +button("update(sem)","save","sem.changed") 
+          +button("remove(sem)","remove")  
+  +panel("Formular einrichten","active == 'form'","active != 'form'")

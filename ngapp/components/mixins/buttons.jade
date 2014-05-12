@@ -1,0 +1,12 @@
+mixin button(ngClick,glyphicon,ngShow,ngDisabled,popover)
+  button.btn(
+    ng-click=ngClick,
+    ng-show=ngShow,
+    ng-disabled=ngDisabled
+    popover=popover 
+    popover-trigger=(popover ? "mouseenter" : undefined)
+    popover-animation=(popover ? "true" : undefined)
+    popover-popup-delay=(popover ? "250" : undefined)
+    )
+    if glyphicon
+      span.glyphicon(class="glyphicon-"+glyphicon)

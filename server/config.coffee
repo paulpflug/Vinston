@@ -10,8 +10,16 @@ schema = {
     permissions:
       get:
         all: []
+      set: ["root"]
+    initial: false
+  semesters:
+    type: "objects"
+    permissions:
+      get:
+        docent: []
+        all: ["name","start","end","semesterBreak","published"]
       set:
-        root: []
+        set: ["root"]
     initial: false
 }
 
@@ -20,8 +28,7 @@ schema[connectionStringKey] = {
   permissions:
     get:
       root: []
-    set:
-      root: []
+    set: ["root"]
   initial: true
   test: (data) ->   
     options = { server: { auto_reconnect:false, socketOptions: { connectTimeoutMS: 500 }}}
@@ -80,42 +87,52 @@ getDBconnection = () ->
 
 filterByPermission = (obj,keys) ->
   newObj = {}
+  negativCount = 0
   for key in keys
-    newObj[key] = obj[key]
+    if key.charAt(0) == "-"
+      negativCount++
+    else
+      if obj[key]
+        newObj[key] = obj[key]
+  if negativCount == keys.length
+    for key in keys
+      key.slice(1)
+    newObj = {}
+    for key,val of obj
+      if keys.indexOf(key) == -1
+        newObj[key] = val
   return newObj
 
+get = (key) ->
+  success = false
+  content = nconf.get(key)
+  if content
+    success = true
+  return {success:success,content:content}
+
+set = (key, content) ->
+  nconf.set(key,content)
+  nconf.save()
+  return true
+
 getByPermission = (key, permission) ->
-  response = false
+  success = false
+  content = false
   if permission
-    data = nconf.get(key)
-    if data
+    data = get(key)
+    if data.success
+      success = true
+      content = data.content
       type = schema[key].type
       if (type == "objects" or type == "object") and permission.length>0
         if (type == "objects")
-          newData = []
-          for d in data
-            newData.push(filterByPermission(d,permission))
+          newContent = []
+          for contentItem in data.content
+            newContent.push(filterByPermission(contentItem,permission))
         else
-          newData = filterByPermission(data,permission)
-        data = newData
-      response = data  
-  return response
-setByPermission = (key, data, permission) ->
-  response = false
-  if permission
-    type = schema[key].type
-    if (type == "objects" or type == "object") and permission.length>0
-      if (type == "objects")
-        newData = []
-        for d in data
-          newData.push(filterByPermission(d,permission))
-      else
-        newData = filterByPermission(data,permission)
-      data = newData
-    nconf.set(key,data)
-    nconf.save()
-    response = true  
-  return response
+          newContent = filterByPermission(data.content,permission)
+        content = newContent
+  return {success:success,content:content}
 
 module.exports = {
   nconf: nconf
@@ -124,5 +141,5 @@ module.exports = {
   connectionStringKey: connectionStringKey
   getDBconnection: getDBconnection
   getByPermission: getByPermission
-  setByPermission: setByPermission
+  set: set
 }

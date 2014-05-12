@@ -1,0 +1,8 @@
+mixin panel(title,classPrimary,classDefault)
+  .panel(ng-show="loaded"
+    ng-class="{'panel-primary': "+classPrimary+", 'panel-default': "+classDefault+"}")
+    .panel-heading
+      h3.panel-title= title 
+    .panel-body
+      if block
+        block

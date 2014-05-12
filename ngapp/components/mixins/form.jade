@@ -1,0 +1,35 @@
+include /components/mixins/buttons.jade
+mixin input(ngModel,placeholder,ngChange)
+  p
+    input.form-control(
+      type="text"
+      ng-model=ngModel
+      placeholder=placeholder
+      ng-change=ngChange
+      )
+
+
+mixin inputCheckbox(ngModel,placeholder,ngChange)
+  .checkbox
+    label
+      input(
+        type="checkbox"
+        ng-model=ngModel
+        ng-true-value="true"
+        ng-false-value="false"
+        ng-change=ngChange)
+      span= placeholder
+
+mixin inputDate(ngModel,placeholder,ngChange,showButtonBar)
+  p.input-group(ng-controller="isOpenCtrl")
+    input.form-control(
+      ng-model=ngModel
+      placeholder=placeholder
+      ng-change=ngChange
+      show-button-bar=showButtonBar
+      datepicker-popup="dd.MM.yyyy"
+      datepicker-options="dateOptions"
+      is-open="isOpen"
+      )
+    span.input-group-btn
+      +button("toggle($event)","calendar")

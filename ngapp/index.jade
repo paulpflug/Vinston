@@ -29,21 +29,23 @@ html.no-js
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. 
       Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
       ![endif]
-    i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="loaded")
-    #inforow.row.inforow(ng-cloak,ng-show="loaded")
-      nav.nav.nav-pills(role="navigation")
+    #startup.well(ng-hide="finished")
+      i.fa.fa-spinner.fa-spin.fa-2x
+      span(ng-cloak,ng-show="loaded") Versuche einzuloggen... 
+    #inforow.row.inforow(ng-cloak,ng-show="finished")
+      ul.nav.nav-pills(role="navigation")
         img.activeInstitute.left.img-rounded(ng-click="institute.showModal()"
             ng-src="{{session.getActiveInstitute().image}}",alt="{{session.getActiveInstitute().name}}")
         button#semesterbutton.left.btn.btn-default {{semesterName}}
           p {{dauer}}
-        button#loginbutton.btn.btn-default.right(ng-if="!auth.getUser()",ng-click="auth.showLoginModal()") Login
-        button#userbutton.btn.btn-default.right(ng-if="auth.getUser()")
-          span Hi, {{auth.getUser().name}}
+        button#loginbutton.btn.btn-default.right(ng-if="!session.getUser()",ng-click="auth.showLoginModal()") Login
+        button#userbutton.btn.btn-default.right(ng-if="session.getUser()")
+          span Hi, {{session.getUser().name}}
 
         li.dropdown
-          a.dropdown-toggle(href="#",data-toggle="dropdown") Student
+          a.dropdown-toggle(href) Student
             span.caret
-          ul.dropdown-menu
+          ul.dropdown-menu(role="menu")
             li
               a(href="#/student/main") Mein Stundenplan
             li
@@ -53,7 +55,7 @@ html.no-js
             li
               a(href="#/all/vlvz") Vorlesungsverzeichnis
         li.dropdown(ng-if="auth.inGroup('docent')")
-          a.dropdown-toggle(href="#",data-toggle="dropdown") Dozent
+          a.dropdown-toggle(href) Dozent
             b.caret
           ul.dropdown-menu
             li
@@ -63,9 +65,9 @@ html.no-js
             li
               a(href="#/docent/registration") Zumeldung
         li.dropdown(ng-if="auth.inGroup('admin')")
-          a.dropdown-toggle(href="#",data-toggle="dropdown") Administrator
+          a.dropdown-toggle(href="#") Administrator
             b.caret
-          ul.dropdown-menu
+          ul.dropdown-menu(role="menu")
             li 
               a(href="#/admin/rooms") Räume
             li 
@@ -75,9 +77,9 @@ html.no-js
             li
               a(href="#/admin/roomBookings") Raumbuchungen
         li.dropdown(ng-if="auth.inGroup('root')")
-          a.dropdown-toggle(href="#",data-toggle="dropdown") Root
+          a.dropdown-toggle(href="#") Root
             b.caret
-          ul.dropdown-menu
+          ul.dropdown-menu(role="menu")
             li 
               a(href="#/root/helpUser") Benutzer helfen
             li 
@@ -92,13 +94,12 @@ html.no-js
               a(href="#/root/appConfig") App konfiguration
             li 
               a(href="#/root/serverConfig") Server konfiguration
-    .row(ng-cloak,ng-show="loaded")
+    .row(ng-cloak,ng-show="finished")
       ul.breadcrumb
         li
           a(href="#") Home
-        li.active(ng-if="params && params.function")
-          {{params.function}}
-    .row(ng-view,ng-cloak,ng-show="loaded")
+        li.active(ng-if="params && params.function") {{params.function}}
+    .row(ng-view,ng-cloak,ng-show="finished")
     toaster-container(toaster-options="{'time-out': 3000,'position-class':'toast-bottom-right'}")
     // build:js vendor/vendor.js
     // bower:js
@@ -131,6 +132,7 @@ html.no-js
     // build:js({.tmp,app}) scripts/scripts.js 
     script(src="components/socketData/socketData.js")
     script(src="components/globals/globals.js")
+    script(src="components/configData/configData.js")
     script(src="app.js")
     script(src="index.js")
     script(src="indexInstitutes.js")

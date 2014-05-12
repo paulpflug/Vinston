@@ -27,8 +27,6 @@ vinstonApp.config ["$routeProvider", ($routeProvider) ->
       templateUrl: "main.html"
       controller: 'MainCtrl'
       resolve: 
-        tokenAuth: (auth) ->
-            return auth.tokenLogin()
         loadRoute: ($ocLazyLoad) ->
             return $ocLazyLoad.load 
                 name: 'MainModule',
@@ -78,4 +76,16 @@ vinstonApp.filter("isNot", () ->
       return result
     else
       return array
+)
+
+vinstonApp.controller("isOpenCtrl", ($scope) ->
+  $scope.isOpen = false
+  $scope.dateOptions = {
+    startingDay:1
+  };
+
+  $scope.toggle = ($event) ->
+    $event.preventDefault();
+    $event.stopPropagation();
+    $scope.isOpen = !$scope.isOpen
 )

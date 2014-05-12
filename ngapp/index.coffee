@@ -1,5 +1,6 @@
 angular.module("vinstonApp")
 .controller "appCtrl", ($scope ,$route , session, auth, institute) ->
+  $scope.finished = false
   $scope.session = session
   $scope.auth = auth
   $scope.institute = institute
@@ -8,6 +9,5 @@ angular.module("vinstonApp")
   $scope.$on "$routeChangeSuccess", (ev, current) ->
     $scope.params = current.params
     $scope.$$phase || $scope.$digest()
-
-  $scope.loaded = true
+  $scope.finished = true
   

@@ -1,6 +1,8 @@
 Q = require "q"
 mongoose = require "mongoose"
 crypto = require "crypto"
+util = require "util"
+
 groups = ["all","student","docent","admin","root"]  
 tokenStore = {}
 tokenExpiration = 1000*60*30 # 30 minutes
@@ -23,14 +25,23 @@ module.exports =
           group = client.handshake.user.group
         else
           group = "all"
-        permission = permissions[group]
-        if not permission
+        if util.isArray(permissions)
           i = groups.indexOf(group)
-          while i>=0
-            i--
-            permission = permissions[groups[i]]
-            if permission
+          while i < groups.length
+            j = permissions.indexOf(groups[i])
+            i++
+            if j > -1
+              permission = true
               break
+        else
+          permission = permissions[group]
+          if not permission
+            i = groups.indexOf(group)
+            while i>=0
+              i--
+              permission = permissions[groups[i]]
+              if permission
+                break
         permission = false if not permission
         return permission
       client.handshake.inGroup = (group) ->
@@ -51,31 +62,35 @@ module.exports =
             tokenStore[token].removeTimeout = () ->
               clearTimeout(timoutObj)
     io.of("/auth").on "connection", (client) ->
-      client.on "auth.byToken", (item) ->
-        response = false
-        if item and item.token and item.hash
-          token = item.token
+      client.on "auth.byToken", (request) ->
+        success = false
+        content = false
+        if request and request.token and request.content
+          token = request.content
           storedItem = tokenStore[token]
           if storedItem
             if storedItem.removeTimeout
               storedItem.removeTimeout()
             storedItem.resetLongTimeout()
             user = storedItem.user
-            response = {name:user.name,group:user.group,token:token}
+            content = {name:user.name,group:user.group}
+            success = true
             client.handshake.user = user
             client.handshake.token = token
-          client.emit "auth.byToken."+item.hash, response
-      client.on "auth", (item) ->
-        response = false
-        if item and item.user and item.user.name and item.user.password and item.hash
-          findUser(item.user.name)
+          client.emit "auth.byToken."+request.token, {success: success, content: content}
+      client.on "auth", (request) ->
+        success = false
+        content = false
+        if request and request.content and request.content.name and request.content.password and request.token
+          findUser(request.content.name)
           .then (user) ->
-            user.comparePassword(item.user.password)
+            user.comparePassword(request.content.password)
             .then (isMatch) ->
               if isMatch
                 crypto.randomBytes 48, (ex, buf) ->
                   token = buf.toString "base64"
-                  response = {name:user.name,group:user.group,token:token}
+                  success = true
+                  content = {name:user.name,group:user.group,token:token}
                   tokenStore[token] = {user:user}
                   tokenStore[token].resetLongTimeout = () ->
                     if timoutObj
@@ -84,11 +99,11 @@ module.exports =
                   tokenStore[token].resetLongTimeout()
                   client.handshake.user = user
                   client.handshake.token = token
-                  client.emit "auth."+item.hash, response
+                  client.emit "auth."+request.token, {success: success, content: content}
               else
-                client.emit "auth."+item.hash, response
+                client.emit "auth."+request.token, {success: success, content: content}
           .catch () ->
-            client.emit "auth."+item.hash, response
+            client.emit "auth."+request.token, {success: success, content: content}
           
     d.resolve()
     return d.promise

@@ -1,0 +1,54 @@
+{
+  "institutes": [
+    {
+      "name": "name",
+      "pretty": "Name"
+    },
+    {
+      "name": "planning",
+      "pretty": "Planung"
+    },
+    {
+      "name": "longName",
+      "pretty": "Langer Name"
+    },
+    {
+      "name": "affiliation",
+      "pretty": "Zugehörigkeit"
+    },
+    {
+      "name": "image",
+      "pretty": "Bild"
+    }
+  ],
+  "semesters": [
+    {
+      "name": "name",
+      "pretty": "Name"
+    },
+    {
+      "name": "regstart",
+      "pretty": "Zumeldungsbeginn"
+    },
+    {
+      "name": "regend",
+      "pretty": "Zumeldungsende"
+    },
+    {
+      "name": "start",
+      "pretty": "Semesterbeginn"
+    },  
+    {
+      "name": "end",
+      "pretty": "Semesterende"
+    },    
+    {
+      "name": "semesterBreak",
+      "pretty": "Beginn vorlesungsfreie Zeit"
+    },
+    {
+      "name": "published",
+      "pretty": "Veröffentlichen"
+    }
+  ]
+}

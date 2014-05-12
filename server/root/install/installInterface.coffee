@@ -8,7 +8,7 @@ exposeInstallInterface = (io, config, users, configdone) ->
     console.log("exposing install user interface")
     io.of("/installUsers").on "connection", (client) ->
       client.on "root.set", (data) ->            
-        if (data and data.value and data.hash and data.value.name and data.value.password)
+        if (data and data.value and data.token and data.value.name and data.value.password)
           data.value.group = "root"
           config.getDBconnection()
           .then (conn) ->
@@ -17,54 +17,61 @@ exposeInstallInterface = (io, config, users, configdone) ->
             root.save (err) ->
               if err
                 console.log err
-                client.emit "root.set." + data.hash, false
+                client.emit "root.set." + data.token, {success:false,content:err}
                 return
-              client.emit "root.set." + data.hash, true
+              client.emit "root.set." + data.token, {success:true,content:false}
               d.resolve()
         else
-          client.emit "root.set." + data.hash, false                                    
+          client.emit "root.set." + data.token, {success:false,content:false}                                    
     console.log("Install user interface exposed")
 
   console.log("exposing install config interface")
   io.of("/installConfig").on "connection", (client) ->
     if configdone
       exposeUserInterface()
-    _.forEach config.schema, (value,key)->
-      if value and value.initial
-        # getter
-        client.on key, () ->
-          client.emit key + ".data", config.nconf.get(key)
+    _.forEach config.schema, (item,key)->
+      if item and item.initial
         # tester
-        if value.test
-          client.on key + ".test", (data) ->
-            if (data and data.value and data.hash)
-              value.test(data.value).then(
-                ((info) -> client.emit key + ".test." + data.hash, {success:true,info:info}),
-                ((err) -> client.emit key + ".test." + data.hash, {success:false,err:err})
+        if item.test
+          client.on key + ".test", (request) ->
+            if (request and request.value and request.token)
+              item.test(request.value).then(
+                ((info) -> client.emit key + ".test." + request.token, {success:true,content:info}),
+                ((err) -> client.emit key + ".test." + request.token, {success:false,content:err})
                 )
+        # getter
+        client.on key + ".get", (request) ->
+          if (request and request.token)
+            response = config.getByPermission(key, [])  
+            client.emit key + ".get." + request.token, response
+        
         # setter
-        client.on key + ".set", (data) ->
-          if (data and data.value and data.hash)
-            save = () ->
-              config.nconf.set(key,data.value)
-              config.nconf.save()
-              client.emit key + ".set." + data.hash, true
-              config.checkForInstalled()
-              .then (success) ->
-                if success  
-                  config.getDBconnection()
-                  .then users.checkForInstalled
-                  .then (success) ->                    
-                    if success
-                      client.emit "done"
-                      d.resolve() 
-                    else                        
-                      exposeUserInterface()
-                      client.emit "configdone"
-            if value.initialTest
-              value.initialTest(data.value).then(save,() -> client.emit key + ".set." + data.hash, false)
+        client.on key + ".set", (request) ->
+          set = (request) ->
+            config.set(key, request.content)
+            response = config.getByPermission(key, []) 
+            client.emit key + ".set." + request.token, response
+            broadcastUpdate(key)
+            config.checkForInstalled()
+            .then (success) ->
+              if success  
+                config.getDBconnection()
+                .then users.checkForInstalled
+                .then (success) ->                    
+                  if success
+                    client.emit "done"
+                    d.resolve() 
+                  else                        
+                    exposeUserInterface()
+                    client.emit "configdone"
+          if (request and request.content and request.token)
+            if item.test
+              item.test request.content
+              .then set, (err) -> 
+                client.emit key + ".set." + request.token, {success:false, content:err}
             else
-              save()
+              set()
+
         
   console.log("Install config interface exposed")
   return d.promise

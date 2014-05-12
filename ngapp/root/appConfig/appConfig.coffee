@@ -1,31 +1,30 @@
 "use strict"
 
-angular.module("AppConfigModule",["oc.lazyLoad"])
-.controller "appConfigCtrl", ($scope, $q,md5, config,toaster) ->
-  setInstitutesActive = (newValue, oldValue) ->
-    if newValue != oldValue
-      $scope.active = "institutes"
+angular.module("AppConfigModule",["oc.lazyLoad","configData"])
+.controller "appConfigCtrl", ($scope, $q,configData, config,toaster) ->
+  activeSetter = (name) ->
+    return (newValue, oldValue) ->
+      if newValue != oldValue
+        $scope.active = name
+
   ready = () ->
-    $scope.$watch("active =='institutes' ? true : institute.filter", setInstitutesActive, true)
-    $scope.$watch("active =='institutes' ? true : institutes", setInstitutesActive, true)
+    $scope.$watch("institutes.filter", activeSetter("institutes"), true)
+    $scope.$watch("institutes.data", activeSetter("institutes"), true)
+    $scope.$watch("semester.filter", activeSetter("semesters"), true)
     $scope.loaded = true
+  $scope.institutes = configData.setup("institutes")
   $scope.loaded = false  
   $scope.active = ""
-  $scope.institute.filter = {}
-  $scope.institute.disabled = false
-  config.get("institutes").then (institutes) ->
-    $scope.institutes = institutes    
-    $scope.$$phase || $scope.$digest()
-    ready()
-  $scope.setChanged = (obj) ->
-    obj.changed = true
+
+  $q.all([$scope.institutes.loaded]).then(ready)
+
   $scope.testImg = (obj) ->
-    $scope.setChanged(obj)
+    $scope.institutes.setChanged(obj)
     img = new Image()
     obj.status = "loading"
     $scope.$$phase || $scope.$digest()
     img.addEventListener 'error', () ->
-      obj.status = "err"
+      obj.status = "danger"
       $scope.$$phase || $scope.$digest()
     img.addEventListener 'load', () ->
       obj.status = "success"
