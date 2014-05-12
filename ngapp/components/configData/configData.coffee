@@ -10,13 +10,16 @@ angular.module('configData', []).factory "configData", ($rootScope,$filter,$q,cl
   factory.options = {
     nameOfItem : "name"
     idOfItem : "_id"
+    nameOfDatabase : ""
   }
   factory.status = ""
   factory.statusText = ""
   factory.type = ""
   factory.unchangedData = []
   
-  factory.setup = (dataname) ->
+  factory.setup = (dataname,scope,options) ->
+    for k,v of options
+      factory.options[k] = v
     factory.dataname = dataname
     $q.all([config.get(dataname),config.getType(dataname)])
     .then (results) ->
@@ -30,6 +33,28 @@ angular.module('configData', []).factory "configData", ($rootScope,$filter,$q,cl
     .finally () -> 
       d.resolve()
       $rootScope.$$phase || $rootScope.$apply()
+    cbindex = config.addUpdatecb () ->
+      config.get(dataname)
+      .then (response) ->
+        if response.success
+          factory.unchangedData = response.content
+          if factory.type == "objects"
+            for item in factory.unchangedData
+              item[factory.options.idOfItem] = generate.id()
+            for item in factory.data
+              if item.changed
+                toaster.pop("error","Änderung",factory.options.nameOfDatabase + " geändert")
+                break
+            factory.data = _.cloneDeep(factory.unchangedData)
+          else            
+            if !factory.changed
+              factory.data = _.cloneDeep(factory.unchangedData)
+            else
+              toaster.pop("info","Änderung",factory.options.nameOfDatabase + " geändert")
+
+            
+    scope.$on "$destroy", () -> 
+      config.removeUpdatecb cbindex
     return factory
 
   factory.save = (obj) ->
@@ -41,15 +66,18 @@ angular.module('configData', []).factory "configData", ($rootScope,$filter,$q,cl
     if factory.type == "objects" and obj
       indexold = _.findIndex factory.unchangedData, (item) -> item[factory.options.idOfItem] == obj[factory.options.idOfItem]
       objold = factory.unchangedData[indexold]
-      factory.unchangedData[indexold] = _.cloneDeep(obj)
+      factory.unchangedData[indexold] = clean(_.cloneDeep(obj))
       data = factory.unchangedData
     else
       data = factory.data
     config.set(factory.dataname, data)
     .then (response) ->
       d.resolve(response.success)
-      if response.success and !(factory.type == "objects" and obj)
-        factory.unchangedData = _.cloneDeep(factory.data)
+      if response.success 
+        if(factory.type == "objects" and obj)
+          obj.changed = false
+        else
+          factory.unchangedData = _.cloneDeep(factory.data)
       if !response.success and factory.type == "objects" and obj
         factory.unchangedData[indexold] = objold
     .finally () ->
@@ -65,7 +93,7 @@ angular.module('configData', []).factory "configData", ($rootScope,$filter,$q,cl
       factory.data.splice(index,1)
       factory.save().then (success) ->
         if not success
-          factory.unchangedData.splice(index,0,obj)
+          factory.data.splice(index,0,obj)
 
 
   factory.unchange = (obj) ->
@@ -104,8 +132,10 @@ angular.module('configData', []).factory "configData", ($rootScope,$filter,$q,cl
         obj[factory.options.idOfItem] = generate.id()
       factory.data.push (obj)
       factory.save().then (success) ->
-        if success and wasFilter
-          factory.filter = {}
+        if success 
+          factory.unchangedData.push clean(_.cloneDeep(obj))
+          if wasFilter
+            factory.filter = {}
         if not success
           index = factory.data.indexOf(obj)
           factory.data.splice(index,1)

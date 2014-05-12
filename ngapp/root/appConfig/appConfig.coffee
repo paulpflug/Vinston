@@ -1,7 +1,7 @@
 "use strict"
 
 angular.module("AppConfigModule",["oc.lazyLoad","configData"])
-.controller "appConfigCtrl", ($scope, $q,configData, config,toaster) ->
+.controller "appConfigCtrl", ($scope, $q,configData, toaster) ->
   activeSetter = (name) ->
     return (newValue, oldValue) ->
       if newValue != oldValue
@@ -12,7 +12,7 @@ angular.module("AppConfigModule",["oc.lazyLoad","configData"])
     $scope.$watch("institutes.data", activeSetter("institutes"), true)
     $scope.$watch("semester.filter", activeSetter("semesters"), true)
     $scope.loaded = true
-  $scope.institutes = configData.setup("institutes")
+  $scope.institutes = configData.setup("institutes",$scope,{nameOfDatabase:"Institute"})
   $scope.loaded = false  
   $scope.active = ""
 

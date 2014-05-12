@@ -17,6 +17,7 @@ mod.service "clean", () ->
       if angular.isObject(arg)
         arg = deleteKeys(arg)
     return arg
+
 mod.service "generate", () ->
   this.token = () ->
     number = 0
@@ -35,19 +36,30 @@ mod.service "generate", () ->
     return id
 
   return this
+
 mod.service "config", ($rootScope,$q,generate,clean) ->
   socket = io.connect("/config")
   getter = false
   config = {}
   types = {}
+  updatecbs = []
   socket.on "update", (name) ->
     if config[name]
-      this.get(name,true)
+      get(name,true)
+      .then (response) ->
+        if response.success
+          console.log updatecbs
+          for cb in updatecbs
+            cb()
   updateItem = (name,response) ->
     config[name] = response
     $rootScope.$$phase || $rootScope.$apply()
-
-  this.get = (name,update) ->
+  this.addUpdatecb = (cb) ->
+    updatecbs.push(cb)
+    return updatecbs.indexOf(cb)
+  this.removeUpdatecb = (index) ->
+    updatecbs.splice(index,1)
+  get = (name,update) ->
     return getter if getter
     d = $q.defer()
     getter = d.promise
@@ -69,6 +81,7 @@ mod.service "config", ($rootScope,$q,generate,clean) ->
           d.reject() 
           getter = false       
     return d.promise
+  this.get = get
 
   this.getType = (name) ->
     d = $q.defer()
