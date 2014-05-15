@@ -1,5 +1,5 @@
 mixin panel(title,classPrimary,classDefault)
-  .panel(ng-show="loaded"
+  .panel(ng-show="finished"
     ng-class="{'panel-primary': "+classPrimary+", 'panel-default': "+classDefault+"}")
     .panel-heading
       h3.panel-title= title 

@@ -1,9 +1,10 @@
 "use strict"
 window.socket = io.connect()
 
+
 vinstonApp = angular.module("vinstonApp", [
-  "socketData"
   "globals"
+  "interfaces"
   "ngCookies"
   "ngResource"
   "ngSanitize"
@@ -78,7 +79,7 @@ vinstonApp.filter("isNot", () ->
       return array
 )
 
-vinstonApp.controller("isOpenCtrl", ($scope) ->
+vinstonApp.controller "isOpenCtrl", ($scope) ->
   $scope.isOpen = false
   $scope.dateOptions = {
     startingDay:1
@@ -88,4 +89,4 @@ vinstonApp.controller("isOpenCtrl", ($scope) ->
     $event.preventDefault();
     $event.stopPropagation();
     $scope.isOpen = !$scope.isOpen
-)
+

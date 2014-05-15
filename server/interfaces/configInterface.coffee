@@ -25,6 +25,7 @@ module.exports =
         client.on key + ".get", (request) ->
           if (request and request.token)
             permission = client.handshake.getPermission(item.permissions.get)
+            console.log permission
             response = config.getByPermission(key, permission)  
             client.emit key + ".get." + request.token, response
         # getter for type

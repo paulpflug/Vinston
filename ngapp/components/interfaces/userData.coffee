@@ -1,0 +1,1 @@
+mod = angular.module('interfaces')

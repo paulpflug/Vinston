@@ -1,35 +1,35 @@
+include /components/mixins/buttons.jade
+include /components/mixins/panel.jade
+include /components/mixins/form.jade
 #config(ng-controller="serverConfigCtrl" 
   ng-cloak
   ng-show="loaded")
-  .panel(
-    ng-class="{'panel-primary': !connectionSaved, 'panel-default': connectionSaved}")
-    .panel-heading
-      h3.panel-title Datenbank einrichten
-    .panel-body
-      form(
-          name="connectionForm"
-          ng-class="{'has-success':connectionTested && !connectionSaved, 'has-error':!connectionTested&&connectionForm.connectionString.$dirty &&  !connectionSaved}")
-        .col-md-10.input-addon
-          input.form-control(
-              ng-disabled="userSaved"
-              ng-model="mongoConnection"
-              name="connectionString"
-              placeholder="mongodb Verbindung (z.b. mongodb://localhost/Vinston )"
-              ng-change="testConnection()")
-          i.fa.fa-spinner.fa-spin(ng-show="connectionTesting")
-        .col-md-2 
-          button.btn(
-            ng-class="{'btn-primary': !connectionSaved, 'btn-default': connectionSaved}"
-            ng-click="setConnection()"
-            ng-disabled="!connectionTested || connectionSaving ||connectionSaved") 
-            span.glyphicon(
-              ng-class="{'glyphicon-save': !connectionSaved, 'glyphicon-ok': connectionSaved}"
-              ng-show="!connectionSaving")
-            i.fa.fa-spinner.fa-spin(ng-show="connectionSaving")
-            span {{connectionSaved ? " Ok":" Speichern"}} 
-      span.label.label-danger(ng-show="connectionError") {{connectionError}}
-      span.label.label-info(ng-show="connectionInfo") {{connectionInfo}}
-      a.col-md-12(
-        target="_blank"
-        href="http://mongoosejs.com/docs/api.html#index_Mongoose-createConnection")
-        span Mongoose URI Dokumentation
+  i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="loaded")
+  +panel("Datenbank einrichten","active == 'connection'","active != 'connection'")
+    form(
+        name="connectionForm"
+        ng-class="{'has-success':connectionTested && !connectionSaved, 'has-error':!connectionTested&&connectionForm.connectionString.$dirty &&  !connectionSaved}")
+      .col-md-10.input-addon
+        input.form-control(
+            ng-disabled="userSaved"
+            ng-model="mongoConnection"
+            name="connectionString"
+            placeholder="mongodb Verbindung (z.b. mongodb://localhost/Vinston )"
+            ng-change="testConnection()")
+        i.fa.fa-spinner.fa-spin(ng-show="connectionTesting")
+      .col-md-2 
+        button.btn(
+          ng-class="{'btn-primary': !connectionSaved, 'btn-default': connectionSaved}"
+          ng-click="setConnection()"
+          ng-disabled="!connectionTested || connectionSaving ||connectionSaved") 
+          span.glyphicon(
+            ng-class="{'glyphicon-save': !connectionSaved, 'glyphicon-ok': connectionSaved}"
+            ng-show="!connectionSaving")
+          i.fa.fa-spinner.fa-spin(ng-show="connectionSaving")
+          span {{connectionSaved ? " Ok":" Speichern"}} 
+    span.label.label-danger(ng-show="connectionError") {{connectionError}}
+    span.label.label-info(ng-show="connectionInfo") {{connectionInfo}}
+    a.col-md-12(
+      target="_blank"
+      href="http://mongoosejs.com/docs/api.html#index_Mongoose-createConnection")
+      span Mongoose URI Dokumentation

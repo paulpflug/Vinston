@@ -3,15 +3,13 @@
 angular.module("RoomsModule",["oc.lazyLoad",
    "infinite-scroll",
    "localytics.directives"])
-.controller("roomsCtrl", ($scope, $filter, $modal, socketData, config) ->
+.controller("roomsCtrl", ($scope, $filter,$q , $modal, semesterData, config) ->
   $scope.institutes = []
-  config.get("institutes").then (data) ->
-     $scope.institutes = data
-  $scope.rooms = socketData
-  $scope.rooms.setup "rooms", $scope, {
+  $scope.rooms = new semesterData "rooms", $scope, {
     nameOfItem: "name"
     nameOfDatabase: "Raum"
     useDiffs: true
+    showDeleted: true
     }
   $scope.showHistory = (room) -> 
     $scope.rooms.showHistory(room)
@@ -27,4 +25,9 @@ angular.module("RoomsModule",["oc.lazyLoad",
           return $scope.rooms          
       }
     }
+  $q.all([config.get("institutes"),$scope.rooms.loaded])
+  .then (results) ->
+    if results[0] and results[0].success and results[0].content
+      $scope.institutes = results[0].content
+    $scope.finished = true
 )

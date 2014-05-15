@@ -1,35 +1,34 @@
 include /components/mixins/buttons.jade
-mixin input(ngModel,placeholder,ngChange)
+mixin input(placeholder)
   p
     input.form-control(
       type="text"
-      ng-model=ngModel
       placeholder=placeholder
-      ng-change=ngChange
-      )
+      )&attributes(attributes)
 
 
-mixin inputCheckbox(ngModel,placeholder,ngChange)
+mixin inputCheckbox(placeholder)
   .checkbox
     label
       input(
         type="checkbox"
-        ng-model=ngModel
         ng-true-value="true"
-        ng-false-value="false"
-        ng-change=ngChange)
+        ng-false-value="false")&attributes(attributes)
       span= placeholder
 
-mixin inputDate(ngModel,placeholder,ngChange,showButtonBar)
+mixin inputDate(placeholder)
   p.input-group(ng-controller="isOpenCtrl")
     input.form-control(
-      ng-model=ngModel
       placeholder=placeholder
-      ng-change=ngChange
-      show-button-bar=showButtonBar
       datepicker-popup="dd.MM.yyyy"
       datepicker-options="dateOptions"
       is-open="isOpen"
-      )
+      )&attributes(attributes)
     span.input-group-btn
-      +button("toggle($event)","calendar")
+      +iconButton("Kalender","fa-calendar-o")(ng-click="toggle($event)")
+
+mixin inputImg(placeholder,ngModel,status)
+  .input-addon(ng-class=status)
+    +input(placeholder)(ng-model=ngModel)&attributes(attributes)
+    i.fa.fa-spinner.fa-spin(ng-show=status+"=='loading'")
+    img(ng-if=status+"=='success' || !"+status ng-src="{{"+ngModel+"}}")

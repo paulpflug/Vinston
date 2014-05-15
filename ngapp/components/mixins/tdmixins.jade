@@ -1,7 +1,3 @@
 include /components/mixins/form.jade
 
-mixin tdInputImg(ngModel,placeholder,status,ngChange)
-  td.input-addon(ng-class=status)
-    +input(ngModel,placeholder,ngChange)
-    i.fa.fa-spinner.fa-spin(ng-show=status+"=='loading'")
-    img(ng-if=status+"=='success' || !"+status ng-src="{{"+ngModel+"}}")
+

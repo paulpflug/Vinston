@@ -1,0 +1,8 @@
+.modal-header
+  h4(ng-if="!activeSemester") Semester
+.modal-body
+  i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="ready")
+  button.btn.btn-default(ng-repeat="semester in semesters"
+    ng-click="setSemester(semester)"
+    )
+    span {{semester.name}}

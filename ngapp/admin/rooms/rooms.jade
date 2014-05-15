@@ -1,113 +1,97 @@
-#rooms(ng-controller="roomsCtrl")
-  button.btn(ng-click="rooms.toggleDeleted()",ng-disabled="rooms.disabled") gelöschte Anzeigen
+include /components/mixins/other.jade
+include /components/mixins/buttons.jade
+include /components/mixins/panel.jade
+include /components/mixins/form.jade
+#rooms(ng-controller="roomsCtrl" ng-cloak)
+  +spinner()
   table.table.table-striped(
     infinite-scroll="rooms.count()"
     infinite-scroll-distance=2
     infinite-scroll-disabled="busy")
-    tr 
-      td 
-        input.form-control(
-          ng-model="rooms.filter.name"
-          placeholder="Name"
-          ng-change="rooms.updateFilter()"
-          ng-disabled="rooms.disabled")
-      td
-        select.single-chosen(
-          chosen
-          allow-single-deselect="true"
-          data-placeholder="Institut"
-          ng-model="rooms.filter.institute"
-          ng-change="rooms.updateFilter()"
-          ng-options="inst.name as inst.name for inst in institutes"
-          ng-disabled="rooms.disabled")
-          option
-          
-      td
-        select.multiple-chosen.form-control(
-          chosen
-          multiple
-          data-placeholder="Zusätzliche Institute"
-          ng-model="rooms.filter.secInstitutes"
-          ng-change="rooms.updateFilter()"
-          ng-options="inst.name as inst.name for inst in institutes"
-          ng-disabled="rooms.disabled")
-      td
-        button.btn(ng-click="rooms.insert()"
-          ng-disabled="rooms.disabled"
-          popover="Als neuer Raum speichern"
-          popover-trigger="mouseenter"
-          popover-animation="true"
-          popover-popup-delay="250") 
-          span.glyphicon.glyphicon-import
-      td
+    thead
+      tr 
+        th 
+          input.form-control(
+            ng-model="rooms.filter.name"
+            placeholder="Name"
+            ng-change="rooms.updateFilter()"
+            ng-disabled="rooms.disabled")
+        th
+          select.single-chosen(
+            chosen
+            allow-single-deselect="true"
+            data-placeholder="Institut"
+            ng-model="rooms.filter.institute"
+            ng-change="rooms.updateFilter()"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="rooms.disabled")
+            option
+            
+        th
+          select.multiple-chosen.form-control(
+            chosen
+            multiple
+            data-placeholder="Zusätzliche Institute"
+            ng-model="rooms.filter.secInstitutes"
+            ng-change="rooms.updateFilter()"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="rooms.disabled")
+        th
+          +iconButton("Hinzufügen","fa-save").btn-primary(
+              ng-click="rooms.insert()"
+              ng-disabled="rooms.disabled"
+              )  
+        th
+    tbody      
+      tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict"
+        ng-class="{danger: room.deleted, warning: room.changed}")
+        td
+          input.form-control(
+            ng-model="room.name"
+            ng-change="rooms.setChanged(room)"
+            ng-disabled="room.deleted")
+        td
+          select.single-chosen.form-control(
+            chosen
+            data-placeholder="Institut"
+            ng-model="room.institute"
+            ng-change="rooms.setChanged(room)"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="room.deleted")
 
-    tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict"
-      ng-class="{danger: room.deleted, warning: room.changed}")
-      td
-        input.form-control(
-          ng-model="room.name"
-          ng-change="rooms.setChanged(room)"
-          ng-disabled="room.deleted")
-      td
-        select.single-chosen.form-control(
-          chosen
-          data-placeholder="Institut"
-          ng-model="room.institute"
-          ng-change="rooms.setChanged(room)"
-          ng-options="inst.name as inst.name for inst in institutes"
-          ng-disabled="room.deleted")
-
-      td
-        select.multiple-chosen.form-control(
-          chosen
-          multiple
-          data-placeholder="Zusätzliche Institute"
-          ng-model="room.secInstitutes"
-          ng-change="rooms.setChanged(room)"
-          ng-options="inst.name as inst.name for inst in institutes"
-          ng-disabled="room.deleted")
-      td
-        button.btn(ng-click="rooms.update(room)"
-          ng-show="room.changed"
-          popover="Speichern" 
-          popover-trigger="mouseenter"
-          popover-animation="true"
-          popover-popup-delay="250") 
-          span.glyphicon.glyphicon-save
-        button.btn(ng-click="rooms.unchange(room)"
-          ng-show="room.changed"
-          popover="Rückgängig" 
-          popover-trigger="mouseenter"
-          popover-animation="true"
-          popover-popup-delay="250")
-          span.glyphicon.glyphicon-refresh
-        button.btn(ng-click="rooms.delete(room)"
-          ng-show="!room.changed && !room.deleted"
-          popover="Löschen" 
-          popover-trigger="mouseenter"
-          popover-animation="true"
-          popover-popup-delay="250")
-          span.glyphicon.glyphicon-remove
-        button.btn(ng-click="rooms.undelete(room)"
-          ng-show="!room.changed && room.deleted"
-          popover="Wiederherstellen" 
-          popover-trigger="mouseenter"
-          popover-animation="true"
-          popover-popup-delay="250") 
-          span.glyphicon.glyphicon-save
-        button.btn(ng-click="rooms.remove(room)"
-          ng-show="room.deleted"
-          popover="Endgültig löschen" 
-          popover-trigger="mouseenter"
-          popover-animation="true"
-          popover-popup-delay="250") 
-          span.glyphicon.glyphicon-remove
-      td
-        button.btn(ng-click="showHistory(room)"
-          ng-show="room.version>1"
-          popover="History" 
-          popover-trigger="mouseenter"
-          popover-animation="true"
-          popover-popup-delay="250")
-          span.glyphicon.glyphicon-list
+        td
+          select.multiple-chosen.form-control(
+            chosen
+            multiple
+            data-placeholder="Zusätzliche Institute"
+            ng-model="room.secInstitutes"
+            ng-change="rooms.setChanged(room)"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="room.deleted")
+        td
+          .btn-group(ng-show="room.changed && !room.deleted")
+            +iconButton("Speichern","fa-save").btn-primary(
+              ng-click="rooms.save(room)"
+              ) 
+            +iconButton("Rückgängig","fa-undo").btn-default(
+              ng-click="rooms.unchange(room)"
+              )
+          .btn-group(ng-show="room.deleted")
+            +iconButton("Wiederherstellen","fa-undo").btn-default(
+              ng-click="rooms.undelete(room)"
+              ng-show="room.deleted"
+              ) 
+            +iconButton("Endgültig löschen","fa-trash-o").btn-danger(
+              ng-click="rooms.remove(room)"
+              ng-show="room.deleted"
+              ) 
+          +iconButton("Löschen","fa-trash-o").btn-warning(
+            ng-click="rooms.delete(room)"
+            ng-show="!room.changed && !room.deleted"
+            ) 
+        td
+          +iconButton("History","fa-list").btn-default(
+            ng-click="showHistory(room)"
+            ng-show="room.version>1"
+            ) 
   .busy(ng-show="rooms.busy") Lade Daten..

@@ -8,7 +8,7 @@
   h4(ng-if="activeInstitute") Andere
   h4(ng-if="!activeInstitute") Institute
 .modal-body
-  p.loading(ng-hide="ready") Lade ...
+  i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="ready")
   .institute(ng-repeat="institute in institutes | isNot:activeInstitute:'name'"
     ng-click="setInstitute(institute)"
     )

@@ -9,14 +9,14 @@ http = require "http"
 path = require "path"
 mongoose = require "mongoose"
 Q = require "q"
-config = require "./config.coffee"
-configInterface = require "./components/configInterface/configInterface.coffee"
+config = require "./models/configModel.coffee"
+configInterface = require "./interfaces/configInterface.coffee"
 
-users = require "./root/users/usersModel.coffee"
-authInterface = require "./components/authInterface/authInterface.coffee"
+users = require "./models/usersModel.coffee"
+authInterface = require "./interfaces/authInterface.coffee"
 
-models = ["./admin/rooms/roomsModel.coffee"]
-dbInterface = require "./components/dbInterface/dbInterface.coffee"
+models = ["./models/roomsModel.coffee"]
+dbInterface = require "./interfaces/dbInterface.coffee"
 
 
 console.log("pid of serverchild on server side: " + process.pid)
@@ -56,7 +56,7 @@ setup = (configInstalled) ->
   console.log "starting install"
   io = require("socket.io").listen(server)
   rootRoute = "/root/install/install.html"
-  installInterface = require "./root/install/installInterface.coffee"
+  installInterface = require "./interfaces/installInterface.coffee"
   installInterface.exposeInstallInterface io,config, users,configInstalled
   .then () ->  
     console.log "finished install"

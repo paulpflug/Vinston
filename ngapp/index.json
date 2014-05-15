@@ -1,0 +1,129 @@
+{
+  "nav": [
+    {
+      "name":"student",
+      "pretty":"Student",
+      "visible":"true",
+      "path":"#/student/",
+      "functions":[
+        {
+          "name":"main",
+          "pretty":"Mein Stundenplan",
+          "icon":"fa-table"
+        },
+        {
+          "name":"bookRoom",
+          "pretty":"Raum buchen",
+          "icon":"fa-building-o"
+        },
+        {
+          "name":"freeRoom",
+          "path":"#/all/",
+          "pretty":"Freien Raum finden",
+          "icon":"fa-search"
+        },
+        {
+          "name":"vlvz",
+          "path":"#/all/",
+          "pretty":"Vorlesungsverzeichnis",
+          "icon":"fa-list-alt"
+        }
+      ]
+    },
+    {
+      "name":"docent",
+      "pretty":"Dozent",
+      "visible":"auth.inGroup('docent')",
+      "path":"#/docent/",
+      "functions":[
+        {
+          "name":"main",
+          "pretty":"Mein Stundenplan",
+          "icon":"fa-table"
+        },
+        {
+          "name":"bookRoom",
+          "path":"#/student/",
+          "pretty":"Raum buchen",
+          "icon":"fa-building-o"
+        },
+        {
+          "name":"registration",
+          "pretty":"Zumeldung",
+          "icon":"fa-pencil"
+        }
+      ]
+    },
+    {
+      "name":"admin",
+      "pretty":"Administrator",
+      "visible":"auth.inGroup('admin')",
+      "path":"#/admin/",
+      "functions":[
+        {
+          "name":"rooms",
+          "pretty":"Räume",
+          "icon":"fa-building-o"
+        },
+        {
+          "name":"docents",
+          "pretty":"Dozenten",
+          "icon":"fa-users"
+        },
+        {
+          "name":"structure",
+          "pretty":"Struktur",
+          "icon":"fa-sitemap"
+        },
+        {
+          "name":"roomBookings",
+          "pretty":"Raumbuchungen",
+          "icon":"fa-list-alt"
+        }
+      ]
+    },
+    {
+      "name":"root",
+      "pretty":"Root",
+      "visible":"auth.inGroup('root')",
+      "path":"#/root/",
+      "functions":{
+        "helpUser":{
+          "name":"helpUser",
+          "pretty":"Benutzer helfen",
+          "icon":"fa-medkit"
+        },
+        "planning":{
+          "name":"planning",
+          "pretty":"Planung",
+          "icon":"fa-table"
+        },
+        "his":{
+          "name":"his",
+          "pretty":"HIS export",
+          "icon":"fa-cloud-upload"
+        },
+        "import":{
+          "name":"import",
+          "pretty":"Datenbank import",
+          "icon":"fa-cloud-download"
+        },
+        "users":{
+          "name":"users",
+          "pretty":"Benutzer verwalten",
+          "icon":"fa-users"
+        },
+        "appConfig":{
+          "name":"appConfig",
+          "pretty":"App konfiguration",
+          "icon":"fa-cogs"
+        },
+        "serverConfig":{
+          "name":"serverConfig",
+          "pretty":"Server konfiguration",
+          "icon":"fa-cog"
+        }
+      }
+    }
+  ]
+}

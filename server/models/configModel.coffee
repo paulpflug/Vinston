@@ -18,8 +18,7 @@ schema = {
       get:
         docent: []
         all: ["name","start","end","semesterBreak","published"]
-      set:
-        set: ["root"]
+      set:  ["root"]
     initial: false
 }
 
