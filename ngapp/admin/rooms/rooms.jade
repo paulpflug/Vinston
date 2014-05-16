@@ -45,7 +45,7 @@ include /components/mixins/form.jade
         th
           +iconButton("Hinzufügen","fa-save").btn-primary(
               ng-click="rooms.insert()"
-              ng-disabled="rooms.disabled"
+              ng-disabled="!rooms.filter.name"
               )  
         th
     tbody      

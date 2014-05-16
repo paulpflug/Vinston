@@ -22,7 +22,7 @@ link(rel='stylesheet', href='/root/appConfig/appConfig.css')
           th
             +iconButton("Hinzufügen","fa-save").btn-primary(
               ng-click="institutes.insert()"
-              ng-disabled="institutes.filter."+institutes[0].name
+              ng-disabled="!institutes.filter."+institutes[0].name
               )   
       tbody(ui-sortable="sortableOptions('institutes')", ng-model="institutes.data")
         tr(ng-repeat="inst in institutes.data | filter:institutes.filter:strict"
@@ -83,7 +83,7 @@ link(rel='stylesheet', href='/root/appConfig/appConfig.css')
           th         
             +iconButton("Hinzufügen","fa-save").btn-primary(
               ng-click="semesters.insert()"
-              ng-show="semesters.filter."+semesters[0].name
+              ng-disabled="!semesters.filter."+semesters[0].name
               ) 
       tbody(ui-sortable="sortableOptions('semesters')", ng-model="semesters.data")
         tr(ng-repeat="sem in semesters.data | filter:semesters.filter:strict"
