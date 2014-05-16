@@ -101,12 +101,12 @@
         "his":{
           "name":"his",
           "pretty":"HIS export",
-          "icon":"fa-cloud-upload"
+          "icon":"fa-cloud-download"
         },
         "import":{
           "name":"import",
           "pretty":"Datenbank import",
-          "icon":"fa-cloud-download"
+          "icon":"fa-cloud-upload"
         },
         "users":{
           "name":"users",

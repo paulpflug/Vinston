@@ -14,4 +14,4 @@ include /components/mixins/other.jade
   +iconButton("Importieren","fa-cloud-upload")(
     ng-click=""
     ng-disabled="")
-  .editor(style="height:800px" ui-ace="aceOptions" ng-model="data")
+  .editor(style="height:800px" ui-ace="aceOptions" ng-model="data.text" ng-disabled="!data.text")

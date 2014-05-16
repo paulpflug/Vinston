@@ -31,7 +31,7 @@ angular.module('interfaces')
       @totalCount = 0
       @socket = io.connect("/"+dataname)
       scope.$on("$destroy", () -> self.socket.disconnect())
-      self.reset().finally(d.resolve())
+      #self.reset().finally(d.resolve())
       self.socket.on "inserted", (data) ->
         if(self.after >= self.totalCount)
           self.addLocally data
@@ -68,6 +68,7 @@ angular.module('interfaces')
           index = self.data.indexOf olddata
           self.removeLocally index
           $scope.$$phase || $scope.$apply()
+      d.resolve()
           
     getName: (arrayItem) ->
       self = @
@@ -172,20 +173,27 @@ angular.module('interfaces')
           delete self.filter[k]
       self.count()
       
-    insert: () ->
+    insert: (arrayItem) ->
+      d = $q.defer()
+      arrayItem = self.filter if not arrayItem
       self = @
       console.log "inserting..."
       token = generate.token()
-      self.socket.emit "insert", {content: self.filter, token: token}
+      self.socket.emit "insert", {content: arrayItem, token: token}
       self.socket.once "insert." + token, (response) ->
-        if response and response.success
-          self.addLocally(response.content)
-          self.filter = {}   
-          self.updateFilter()
-          toaster.pop "success", "Erfolg", self.getName(response.content) + " wurde gespeichert."   
+        if response 
+          if response.success and response.content
+            self.addLocally(response.content)
+            self.filter = {}   
+            self.updateFilter()
+            toaster.pop "success", "Erfolg", self.getName(response.content) + " wurde gespeichert."   
+          else
+            toaster.pop "error", "Fehler",""
+          d.resolve(response)
         else
-          toaster.pop "error", "Fehler","" 
-
+          d.reject()
+      return d.promise
+      
     useOldItem: (arrayItem) ->
       self = @
       arrayItem.version = self.historyLatestVersion
