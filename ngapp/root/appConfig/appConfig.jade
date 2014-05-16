@@ -22,7 +22,7 @@ link(rel='stylesheet', href='/root/appConfig/appConfig.css')
           th
             +iconButton("Hinzufügen","fa-save").btn-primary(
               ng-click="institutes.insert()"
-              ng-show="institutes.filter."+institutes[0].name
+              ng-disabled="institutes.filter."+institutes[0].name
               )   
       tbody(ui-sortable="sortableOptions('institutes')", ng-model="institutes.data")
         tr(ng-repeat="inst in institutes.data | filter:institutes.filter:strict"

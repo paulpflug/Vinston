@@ -11,27 +11,20 @@ include /components/mixins/form.jade
     thead
       tr 
         th 
-          input.form-control(
+          +input("Name")(
             ng-model="rooms.filter.name"
-            placeholder="Name"
             ng-change="rooms.updateFilter()"
             ng-disabled="rooms.disabled")
         th
-          select.single-chosen(
-            chosen
-            allow-single-deselect="true"
-            data-placeholder="Institut"
+          +singleSelect("Institut")(
             ng-model="rooms.filter.institute"
             ng-change="rooms.updateFilter()"
             ng-options="inst.name as inst.name for inst in institutes"
             ng-disabled="rooms.disabled")
-            option
+
             
         th
-          select.multiple-chosen.form-control(
-            chosen
-            multiple
-            data-placeholder="Zusätzliche Institute"
+          +multiSelect("Zusätzliche Institute")(
             ng-model="rooms.filter.secInstitutes"
             ng-change="rooms.updateFilter()"
             ng-options="inst.name as inst.name for inst in institutes"
@@ -46,24 +39,19 @@ include /components/mixins/form.jade
       tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict"
         ng-class="{danger: room.deleted, warning: room.changed}")
         td
-          input.form-control(
+          +input("Name")(
             ng-model="room.name"
             ng-change="rooms.setChanged(room)"
             ng-disabled="room.deleted")
         td
-          select.single-chosen.form-control(
-            chosen
-            data-placeholder="Institut"
+          +singleSelect("Institut")(
             ng-model="room.institute"
             ng-change="rooms.setChanged(room)"
             ng-options="inst.name as inst.name for inst in institutes"
             ng-disabled="room.deleted")
 
         td
-          select.multiple-chosen.form-control(
-            chosen
-            multiple
-            data-placeholder="Zusätzliche Institute"
+          +multiSelect("Zusätzliche Institute")(
             ng-model="room.secInstitutes"
             ng-change="rooms.setChanged(room)"
             ng-options="inst.name as inst.name for inst in institutes"

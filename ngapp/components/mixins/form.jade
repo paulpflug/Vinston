@@ -1,10 +1,10 @@
 include /components/mixins/buttons.jade
 mixin input(placeholder)
-  p
-    input.form-control(
-      type="text"
-      placeholder=placeholder
-      )&attributes(attributes)
+  
+  input.form-control(
+    type="text"
+    placeholder=placeholder
+    )&attributes(attributes)
 
 
 mixin inputCheckbox(placeholder)
@@ -32,3 +32,16 @@ mixin inputImg(placeholder,ngModel,status)
     +input(placeholder)(ng-model=ngModel)&attributes(attributes)
     i.fa.fa-spinner.fa-spin(ng-show=status+"=='loading'")
     img(ng-if=status+"=='success' || !"+status ng-src="{{"+ngModel+"}}")
+
+mixin singleSelect(placeholder)
+  select.single-chosen(
+    chosen
+    allow-single-deselect="true"
+    data-placeholder=placeholder)&attributes(attributes)
+    option
+
+mixin multiSelect(placeholder)
+  select.multiple-chosen.form-control(
+    chosen
+    multiple
+    data-placeholder=placeholder)&attributes(attributes)
