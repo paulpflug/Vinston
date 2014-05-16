@@ -7,21 +7,21 @@ exposeInstallInterface = (io, config, users, configdone) ->
   exposeUserInterface = () ->
     console.log("exposing install user interface")
     io.of("/installUsers").on "connection", (client) ->
-      client.on "root.set", (data) ->            
-        if (data and data.value and data.token and data.value.name and data.value.password)
-          data.value.group = "root"
+      client.on "root.set", (request) ->            
+        if (request and request.content and request.token and request.content.name and request.content.password)
+          request.content.group = "root"
           config.getDBconnection()
           .then (conn) ->
             user = users.loadModel(conn)
-            root = new user(data.value)
+            root = new user(request.content)
             root.save (err) ->
               if err
-                client.emit "root.set." + data.token, {success:false,content:err}
+                client.emit "root.set." + request.token, {success:false,content:err}
                 return
-              client.emit "root.set." + data.token, {success:true,content:false}
+              client.emit "root.set." + request.token, {success:true,content:false}
               d.resolve()
         else
-          client.emit "root.set." + data.token, {success:false,content:false}                                    
+          client.emit "root.set." + request.token, {success:false,content:false}                                    
     console.log("Install user interface exposed")
 
   console.log("exposing install config interface")

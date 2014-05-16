@@ -79,18 +79,19 @@ angular.module("installApp",[
     $scope.userSaved = false
     user = {name: $scope.userName, password: $scope.userPassword}
     token = generate.token()
-    socketUsers.emit "root.set", {value: user, token: token}
-    socketUsers.once "root.set." + token, (value) ->
-      $scope.userSaved = true if value
-      $scope.userInfo = "Root gespeichert" if value
-      $scope.userSaving = false
-      $scope.$$phase || $scope.$apply() 
-      d.resolve(value)
+    socketUsers.emit "root.set", {content: user, token: token}
+    socketUsers.once "root.set." + token, (response) ->
+      if response and response.success
+        $scope.userSaved = true
+        $scope.userInfo = "Root gespeichert"
+        $scope.userSaving = false
+        $scope.$$phase || $scope.$apply() 
+      d.resolve(response)
     $scope.$$phase || $scope.$apply()
     return d.promise
   socketConfig.on "configdone", () ->
     socketUsers = io.connect("/installUsers") 
-  socketConfig.once "done", () ->
+  socketConfig.once "finished", () ->
     $scope.userSaved = true
     $scope.userInfo = "Root vorhanden"
     $scope.$$phase || $scope.$apply() 
