@@ -1,6 +1,5 @@
-mod = angular.module('interfaces')
-
-mod.service "session", ($rootScope,$cookieStore) ->
+angular.module('interfaces')
+.service "session", ($rootScope,$cookieStore) ->
   activeInstitute = $cookieStore.get("activeInstitute")
   activeInstitute = "" if not activeInstitute
   activeSemester = $cookieStore.get("activeSemester")

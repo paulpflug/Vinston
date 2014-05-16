@@ -3,6 +3,7 @@ window.socket = io.connect()
 
 angular.module("installApp",[
   "globals"
+  "interfaces"
   "ngCookies"
   "ngResource"
   "ngSanitize"
@@ -12,7 +13,7 @@ angular.module("installApp",[
   "toaster"
   "ui.bootstrap"
 ])
-.controller "appCtrl", ($scope, $modal, $interval, $timeout, $q ,config,generate) ->
+.controller "appCtrl", ($scope, $modal, $interval, $timeout, $q ,generate,config) ->
   socketConfig = io.connect("/installConfig")
   socketUsers = io.connect("/installUsers") 
   $scope.loaded = false  

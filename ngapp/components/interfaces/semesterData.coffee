@@ -1,6 +1,5 @@
-mod = angular.module('interfaces')
-
-mod.factory "semesterData", ($rootScope,$filter,$q,generate,toaster) ->
+angular.module('interfaces')
+.factory "semesterData", ($rootScope,$filter,$q,generate,toaster) ->
   class semesterData
     constructor: (dataname, scope, options) ->
       d = $q.defer()
@@ -176,7 +175,7 @@ mod.factory "semesterData", ($rootScope,$filter,$q,generate,toaster) ->
     insert: () ->
       self = @
       token = generate.token()
-      self.socket.emit "insert", {item: self.filter, token: token}
+      self.socket.emit "insert", {content: self.filter, token: token}
       self.socket.once "insert." + token, (response) ->
         if response and response.success
           self.addLocally(response.content)

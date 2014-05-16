@@ -1,1 +1,1 @@
-mod = angular.module('interfaces')
+angular.module('interfaces')

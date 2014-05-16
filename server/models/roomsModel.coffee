@@ -6,12 +6,28 @@ roomSchema = new Schema(
     type: String
     read: "all"
     write: "admin"
+  advancedName:
+    type: String
+    read: "all"
+    write: "admin"
+  hisID:
+    type: String
+    read: "all"
+    write: "admin"
+  capacity:
+    type: Number
+    min: 1
   institute: 
     type: String
     default: ""
     read: "all"
     write: "admin"
   secInstitutes: 
+    type: Array
+    default: []
+    read: "docent"
+    write: "admin"
+  conditionalInstitutes: 
     type: Array
     default: []
     read: "docent"

@@ -1,6 +1,5 @@
-mod = angular.module('interfaces')
-
-mod.service "config", ($rootScope,$q,generate,clean) ->
+angular.module('interfaces')
+.service "config", ($rootScope,$q,generate,clean) ->
   socket = io.connect("/config")
   getter = {}
   config = {}

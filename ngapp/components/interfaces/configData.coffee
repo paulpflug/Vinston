@@ -1,6 +1,5 @@
-mod = angular.module('interfaces')
-
-mod.factory "configData", ($rootScope,$filter,$q,clean,config,generate,toaster) ->
+angular.module('interfaces')
+.factory "configData", ($rootScope,$filter,$q,clean,config,generate,toaster) ->
   class configData
     constructor:(dataname,scope,options) ->
       d = $q.defer()

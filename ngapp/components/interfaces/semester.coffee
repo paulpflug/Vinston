@@ -1,6 +1,5 @@
-mod = angular.module('interfaces')
-
-mod.service "semester", ($rootScope,$q,$modal,session) ->
+angular.module('interfaces')
+.service "semester", ($rootScope,$q,$modal,session) ->
   this.showModal = (staticModal) -> 
     d = $q.defer()
     staticModal = false if not staticModal

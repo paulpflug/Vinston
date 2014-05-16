@@ -15,7 +15,15 @@ include /components/mixins/form.jade
             ng-model="rooms.filter.name"
             ng-change="rooms.updateFilter()"
             ng-disabled="rooms.disabled")
+          +input("Zusätzlicher Name")(
+            ng-model="rooms.filter.advancedName"
+            ng-change="rooms.updateFilter()"
+            ng-disabled="rooms.disabled")
         th
+          +input("Kapazität")(
+            ng-model="rooms.filter.capacity"
+            ng-change="rooms.updateFilter()"
+            ng-disabled="rooms.disabled")
           +singleSelect("Institut")(
             ng-model="rooms.filter.institute"
             ng-change="rooms.updateFilter()"
@@ -26,6 +34,11 @@ include /components/mixins/form.jade
         th
           +multiSelect("Zusätzliche Institute")(
             ng-model="rooms.filter.secInstitutes"
+            ng-change="rooms.updateFilter()"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="rooms.disabled")
+          +multiSelect("Zusätzliche Institute mit Vorbehalt")(
+            ng-model="rooms.filter.conditionalInstitutes"
             ng-change="rooms.updateFilter()"
             ng-options="inst.name as inst.name for inst in institutes"
             ng-disabled="rooms.disabled")
@@ -43,7 +56,15 @@ include /components/mixins/form.jade
             ng-model="room.name"
             ng-change="rooms.setChanged(room)"
             ng-disabled="room.deleted")
+          +input("Zusätzlicher Name")(
+            ng-model="room.advancedName"
+            ng-change="rooms.setChanged(room)"
+            ng-disabled="room.deleted")
         td
+          +input("Kapazität")(
+            ng-model="room.capacity"
+            ng-change="rooms.setChanged(room)"
+            ng-disabled="room.deleted")
           +singleSelect("Institut")(
             ng-model="room.institute"
             ng-change="rooms.setChanged(room)"
@@ -53,6 +74,11 @@ include /components/mixins/form.jade
         td
           +multiSelect("Zusätzliche Institute")(
             ng-model="room.secInstitutes"
+            ng-change="rooms.setChanged(room)"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="room.deleted")
+          +multiSelect("Zusätzliche Institute mit Vorbehalt")(
+            ng-model="room.conditionalInstitutes"
             ng-change="rooms.setChanged(room)"
             ng-options="inst.name as inst.name for inst in institutes"
             ng-disabled="room.deleted")
