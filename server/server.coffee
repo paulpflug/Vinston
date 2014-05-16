@@ -15,7 +15,7 @@ configInterface = require "./interfaces/configInterface.coffee"
 users = require "./models/usersModel.coffee"
 authInterface = require "./interfaces/authInterface.coffee"
 
-models = ["./models/roomsModel.coffee"]
+models = ["./models/roomsModel.coffee","./models/docentsModel.coffee"]
 dbInterface = require "./interfaces/dbInterface.coffee"
 
 
@@ -45,9 +45,10 @@ startup = () ->
   dbInterface.connectDB(config)
   .then () ->
     expose = (model) -> 
-      name = require(model)
-      dbInterface.expose(io, name)
-    expose.apply(undefined, models)
+      Model = require(model)
+      dbInterface.expose(io, Model)
+    for model in models
+      expose(model)
     authInterface.expose(io,users)
   .done () -> console.log "started up"; d.resolve()
   return d.promise

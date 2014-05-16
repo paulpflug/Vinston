@@ -174,6 +174,7 @@ angular.module('interfaces')
       
     insert: () ->
       self = @
+      console.log "inserting..."
       token = generate.token()
       self.socket.emit "insert", {content: self.filter, token: token}
       self.socket.once "insert." + token, (response) ->

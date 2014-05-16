@@ -69,8 +69,10 @@ html.no-js
     .row(ng-view,ng-cloak,ng-show="finished")
     toaster-container(toaster-options="{'time-out': 3000,'position-class':'toast-bottom-right'}")
     // build:js vendor/vendor.js
+    script(src='../vendor/ace-builds/src-min-noconflict/ace.js')
     // bower:js
     script(src='../vendor/jquery/dist/jquery.js')
+
     script(src='../vendor/es5-shim/es5-shim.js')
     script(src='../vendor/angular/angular.js')
     script(src='../vendor/json3/lib/json3.min.js')
@@ -92,6 +94,7 @@ html.no-js
     script(src='../vendor/jquery-ui/ui/jquery-ui.js')
     script(src='../vendor/angular-ui-sortable/sortable.js')
     script(src='../vendor/angular-ui-tree/dist/angular-ui-tree.js')
+    script(src='../vendor/angular-ui-ace/ui-ace.js')
     // endbower
     script(src='vendor/chosen/chosen.jquery.js')
     script(src='vendor/script.js/dist/script.js')

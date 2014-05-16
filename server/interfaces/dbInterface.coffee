@@ -26,6 +26,7 @@ module.exports = {
     model = mongoose.model Model.name
 
     modelVersions = mongoose.model Model.name+"Versions"
+    console.log "exposing "+Model.name
     io.of("/" + Model.name).on "connection", (client) ->
       getAllowedFields = (mode) ->
         mode = "read" if not mode
@@ -100,6 +101,7 @@ module.exports = {
             client.emit "count." + request.token, {success: success, content: content}
 
       client.on "insert", (request) ->
+        console.log request
         if request and request.content and _.isPlainObject(request.content) and request.token
           success = false
           content = undefined

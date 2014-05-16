@@ -13,7 +13,6 @@ include /components/mixins/form.jade
         th 
           +input("Name")(
             ng-model="rooms.filter.name"
-            ng-change="rooms.updateFilter()"
             ng-disabled="rooms.disabled")
           +input("Zusätzlicher Name")(
             ng-model="rooms.filter.advancedName"

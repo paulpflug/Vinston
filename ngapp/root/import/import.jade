@@ -1,0 +1,17 @@
+include /components/mixins/buttons.jade
+include /components/mixins/panel.jade
+include /components/mixins/form.jade
+include /components/mixins/other.jade
+#config(ng-controller="importCtrl" 
+  ng-cloak
+  )
+  +spinner()
+  +singleSelect("Datenbank auswählen")(
+    ng-model="selectedDatabase"
+    ng-options="item for item in databases"
+    ng-change="selectdb()"
+    )
+  +iconButton("Importieren","fa-cloud-upload")(
+    ng-click=""
+    ng-disabled="")
+  .editor(style="height:800px" ui-ace="aceOptions" ng-model="data")
