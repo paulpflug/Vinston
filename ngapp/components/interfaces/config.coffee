@@ -25,7 +25,8 @@ angular.module('interfaces')
     return getter[name] if getter[name]
     d = $q.defer()
     getter[name] = d.promise
-    if config[name] and config[name].length > 0 and !update
+    console.log config[name]
+    if config[name] and config[name].success and !update
       d.resolve(config[name])
       delete getter[name]
       $rootScope.$$phase || $rootScope.$apply() 
@@ -66,7 +67,7 @@ angular.module('interfaces')
     d = $q.defer()
     if content 
       token = generate.token()
-      request = {content: clean(content), token: token} 
+      request = {content: clean.object(content), token: token} 
       socket.emit name + ".set", request
       socket.once name + ".set." + token, (response) ->
         if response

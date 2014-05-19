@@ -1,4 +1,6 @@
 mongoose = require "mongoose"
+deleted = require "./../mongoosePlugins/deleted.coffee"
+versions = require "./../mongoosePlugins/versions.coffee"
 Schema = mongoose.Schema
 modelName = "rooms"
 roomSchema = new Schema(
@@ -32,37 +34,10 @@ roomSchema = new Schema(
     default: []
     read: "docent"
     write: "admin"
-  deleted: 
-    type: Boolean
-    default: false
-    read: "admin"
-    write: "admin"
-  updated: 
-    type: Date
-    default: Date.now 
-    read: "admin"
-    write: "root"
-  updatedBy: 
-    type: String
-    default: ""
-    read: "admin"
-    write: "root"
-  version: 
-    type: String
-    default: 1 
-    read: "admin"
-    write: "root"
 )
-roomVersionSchema = new Schema(
-  parentId: String
-  version: Number
-  changes: { type: Array, default: [] }
-  updated: type: Date
-  updatedBy: { type: String, default: "" }
-)
-
+roomSchema.plugin(deleted)
+roomSchema.plugin(versions,{modelName:modelName})
 mongoose.model(modelName, roomSchema)
-mongoose.model(modelName+"Versions", roomVersionSchema)
 module.exports = {
   name: modelName
   findRestriction:

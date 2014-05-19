@@ -79,7 +79,7 @@ angular.module('interfaces')
       if self.type == "objects" and obj
         indexold = _.findIndex self.unchangedData, (item) -> item[self.options.idOfItem] == obj[self.options.idOfItem]
         objold = self.unchangedData[indexold]
-        self.unchangedData[indexold] = clean(_.cloneDeep(obj))
+        self.unchangedData[indexold] = clean.object(_.cloneDeep(obj))
         data = _.cloneDeep(self.unchangedData)
       else
         data = _.cloneDeep(self.data)
@@ -135,7 +135,7 @@ angular.module('interfaces')
           indexnew = self.data.indexOf obj
           if indexold == indexnew  
             oldItem = self.unchangedData[indexold]
-            newItem = clean(_.cloneDeep(obj))
+            newItem = clean.object(_.cloneDeep(obj))
             diff = DeepDiff.diff(oldItem,newItem)
             obj.changed = if diff then true else false
             $rootScope.$$phase || $rootScope.$apply()
@@ -153,7 +153,7 @@ angular.module('interfaces')
         self.data.push (obj)
         self.save().then (success) ->
           if success 
-            self.unchangedData.push clean(_.cloneDeep(obj))
+            self.unchangedData.push clean.object(_.cloneDeep(obj))
             if wasFilter
               self.filter = {}
           if not success

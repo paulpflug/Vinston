@@ -15,7 +15,10 @@ configInterface = require "./interfaces/configInterface.coffee"
 users = require "./models/usersModel.coffee"
 authInterface = require "./interfaces/authInterface.coffee"
 
-models = ["./models/roomsModel.coffee","./models/docentsModel.coffee"]
+models = ["./models/roomsModel.coffee",
+          "./models/docentsModel.coffee",
+          "./models/structureModel.coffee"
+        ]
 dbInterface = require "./interfaces/dbInterface.coffee"
 
 

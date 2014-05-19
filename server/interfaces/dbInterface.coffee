@@ -24,8 +24,8 @@ module.exports = {
   expose: (io,Model) ->
     allowedFields = {}
     model = mongoose.model Model.name
-
-    modelVersions = mongoose.model Model.name+"Versions"
+    if Model.history
+      modelVersions = mongoose.model Model.name+"Versions"
     console.log "exposing "+Model.name
     io.of("/" + Model.name).on "connection", (client) ->
       getAllowedFields = (mode) ->
@@ -59,16 +59,21 @@ module.exports = {
           real = allowed          
         return real.join(" ")
       getRealFinds = (finds) ->        
-        additionalFinds = client.handshake.getPermission Model.findRestriction
+        if Model.findRestriction
+          additionalFinds = client.handshake.getPermission Model.findRestriction
         if finds and _.isPlainObject(finds)
           allowed = getAllowedFields()
           for k,v of finds
             if allowed.indexOf(k) == -1
               delete finds[k]
-          for k,v of additionalFinds
-            finds[k] = v
+          if additionalFinds
+            for k,v of additionalFinds
+              finds[k] = v
         else
-          fins = additionalFinds
+          if additionalFinds
+            finds = additionalFinds
+          else
+            finds = {}
         return finds
       cleanQuery = (query) ->
         query = cleanQuerySimple(query)
@@ -131,51 +136,66 @@ module.exports = {
           ["_id","$$hashKey","__v"].forEach (string) -> delete item[string]
           model.find {_id:id}, (err,oldItem) ->
             if not err
-              oldversion = new modelVersions()
-              oldversion.parentId = id
-              oldversion.version = oldItem.version
-              oldversion.changes = request.changes
-              oldversion.updated = oldItem.updated
-              oldversion.updatedBy = oldItem.updatedBy
-              item.version++
-              item.updated = Date.now()
-              if client.handshake.user and client.handshake.user.name
-                item.updatedBy = client.handshake.user.name
-              oldversion.save (err) ->
-                if not err
-                  model.update {_id:id}, item, {}, (err) -> 
-                    if not err
-                      success = true
-                      item._id = id
-                      content = item
-                      client.broadcast.emit("updated",id)  
-                    client.emit "update." + request.token, {success: success, content: content}
-
-      client.on "remove", (request) ->
-        if request and request.content and request.token and request.content.id
-          if client.handshake.inGroup(Model.remove)
-            success = false
-            content = undefined
-            model.remove {_id:request.content.id}, (err) -> 
-              if not err
-                modelVersions.remove {parentId:request.content.id}, (err) ->
+              if Model.history
+                oldversion = new modelVersions()
+                oldversion.parentId = id
+                oldversion.version = oldItem.version
+                oldversion.changes = request.changes
+                oldversion.updated = oldItem.updated
+                oldversion.updatedBy = oldItem.updatedBy
+                item.version++
+                item.updated = Date.now()
+                if client.handshake.user and client.handshake.user.name
+                  item.updatedBy = client.handshake.user.name
+                oldversion.save (err) ->
+                  if not err
+                    model.update {_id:id}, item, {}, (err) -> 
+                      if not err
+                        success = true
+                        item._id = id
+                        content = item
+                        client.broadcast.emit("updated",id)  
+                      client.emit "update." + request.token, {success: success, content: content}
+              else
+                model.update {_id:id}, item, {}, (err) -> 
                   if not err
                     success = true
+                    item._id = id
+                    content = item
+                    client.broadcast.emit("updated",id)  
+                  client.emit "update." + request.token, {success: success, content: content}
+      if Model.remove
+        client.on "remove", (request) ->
+          if request and request.content and request.token and request.content.id
+            if client.handshake.inGroup(Model.remove)
+              success = false
+              content = undefined
+              model.remove {_id:request.content.id}, (err) -> 
+                if not err
+                  if Model.history
+                    modelVersions.remove {parentId:request.content.id}, (err) ->
+                      if not err
+                        success = true
+                        client.broadcast.emit "deleted", request.content.id
+                      client.emit "remove." + request.token, {success: success, content: content}
+                  else
+                    success = true
                     client.broadcast.emit "deleted", request.content.id
+                if not Model.History
                   client.emit "remove." + request.token, {success: success, content: content}
 
                     
-
-      client.on "history", (request) ->
-        if request and request.content and request.token
-          if client.handshake.inGroup(Model.history)
-            query = cleanQuerySimple(request.content)
-            modelVersions.find query.find, query.fields, query.options, (err,data) ->
-              success = false
-              content = undefined
-              if not err
-                success = true
-                content = data
-              client.emit "history." + request.token, {success: success, content: content}
+      if Model.history
+        client.on "history", (request) ->
+          if request and request.content and request.token
+            if client.handshake.inGroup(Model.history)
+              query = cleanQuerySimple(request.content)
+              modelVersions.find query.find, query.fields, query.options, (err,data) ->
+                success = false
+                content = undefined
+                if not err
+                  success = true
+                  content = data
+                client.emit "history." + request.token, {success: success, content: content}
     return Q()
 }

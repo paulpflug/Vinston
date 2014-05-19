@@ -1,9 +1,10 @@
 angular.module("DocentsModule",["oc.lazyLoad",
    "infinite-scroll",
    "localytics.directives"])
-.controller "docentsCtrl", ($scope, $filter, $q, $modal, semesterData, config) ->
+.controller "docentsCtrl", ($scope, $filter, $q, $modal, semesterDataCollection, config) ->
+  $scope.finished = false
   $scope.institutes = []
-  $scope.docents = new semesterData "docents", $scope, {
+  $scope.docents = new semesterDataCollection "docents", $scope, {
     nameOfItem: "name"
     nameOfDatabase: "Dozent"
     useDiffs: true
@@ -15,3 +16,4 @@ angular.module("DocentsModule",["oc.lazyLoad",
     if results[0] and results[0].success and results[0].content
       $scope.institutes = results[0].content
     $scope.finished = true
+ 

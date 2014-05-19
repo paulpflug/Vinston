@@ -1,0 +1,43 @@
+include /components/mixins/other.jade
+include /components/mixins/buttons.jade
+include /components/mixins/panel.jade
+include /components/mixins/form.jade
+link(rel='stylesheet', href='/admin/structure/structure.css')
+#structure(ng-controller="structureCtrl" ng-cloak)
+  script(type="text/ng-template" id="nodes_renderer.html")
+    .tree-handle(ui-tree-handle)
+      span
+        +iconButton("Ausklappen","fa-caret-down").btn-default(
+          data-nodrag
+          ng-disabled="!node.nodes || node.nodes.length==0"
+          ng-show="collapsed"
+          ng-click="toggle(this)")
+        +iconButton("Einklappen","fa-caret-up").btn-default(
+          data-nodrag
+          ng-disabled="!node.nodes || node.nodes.length==0"
+          ng-show="!collapsed"
+          ng-click="toggle(this)")
+      +input("Name")(
+        ng-model="node.name"
+        ng-blur="save()")
+      span.btn-group
+        +iconButton("Hinzufügen","fa-plus").btn-primary(
+          data-nodrag
+          ng-click="addNode(this)"
+          ) 
+        +iconButton("Löschen","fa-trash-o").btn-danger(
+          data-nodrag
+          ng-click="deleteNode(this)"
+          ) 
+    ol(ui-tree-nodes="" 
+      ng-model="node.nodes"
+      ng-show="!collapsed")
+      li(ng-repeat="node in node.nodes" 
+        ui-tree-node ng-include="'nodes_renderer.html'")
+
+  +spinner()
+  .tree(ui-tree="treeOptions")
+    ol(ui-tree-nodes="" 
+      ng-model="structure.data.nodes")
+      li(ng-repeat="node in structure.data.nodes" 
+        ui-tree-node ng-include="'nodes_renderer.html'")
