@@ -37,13 +37,15 @@ html.no-js
       ul.nav.nav-pills(role="navigation")
         img.activeInstitute.left.img-rounded(ng-click="institute.showModal()"
             ng-src="{{session.getActiveInstitute().image}}",alt="{{session.getActiveInstitute().name}}")
-        button#semesterbutton.left.btn.btn-default(ng-click="semester.showModal()") {{semesterName}}
-          p {{dauer}}
-        button#loginbutton.btn.btn-default.right(ng-if="!angular.equals(session.getUser(),{})",ng-click="auth.showLoginModal()") Login
-        button#userbutton.btn.btn-default.right(ng-if="angular.equals(session.getUser(),{})")
+        button#semesterbutton.left.btn.btn-default(ng-click="semester.showModal()",style="margin-left:4px")
+          span {{session.getActiveSemester().name}}
+          br
+          span {{session.getActiveSemester().start | date:'dd.MM.yy' }} - {{session.getActiveSemester().end | date:'dd.MM.yy'}}
+        button#loginbutton.btn.btn-default.pull-right(ng-if="!angular.equals(session.getUser(),{})",ng-click="auth.showLoginModal()") Login
+        button#userbutton.btn.btn-default.pull-right(ng-if="angular.equals(session.getUser(),{})")
           span Hi, {{session.getUser().name}}
         for group in nav
-          li.dropdown(ng-if=group.visible)
+          li.dropdown(ng-if=group.visible,style="margin-right:4px")
             a.dropdown-toggle(href)=group.pretty
               span.caret
             ul.dropdown-menu(role="menu")

@@ -13,6 +13,6 @@ angular.module('interfaces')
         activeSemester: () -> return session.getActiveSemester()
       }
     }
-    modalInstance.result.then ((sem)->session.getActiveSemester(sem)),(err)->d.reject(err)
+    modalInstance.result.then ((sem)->session.setActiveSemester(sem)),(err)->d.reject(err)
     return d.promise
   return this

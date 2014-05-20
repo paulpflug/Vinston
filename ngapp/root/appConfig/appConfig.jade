@@ -92,7 +92,7 @@ link(rel='stylesheet', href='/root/appConfig/appConfig.css')
           td
             +input(semesters[0].pretty)(
               ng-model="sem."+semesters[0].name
-              ng-change="semesters.setChanged(sem)")
+              ng-disabled="'true'")
             +inputCheckbox(semesters[6].pretty)(
               ng-model="sem."+semesters[6].name
               ng-change="semesters.setChanged(sem)")
