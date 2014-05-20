@@ -6,7 +6,9 @@ angular.module("RoomsModule",["oc.lazyLoad",
 .controller "roomsCtrl", ($scope, $filter,$q , $modal, semesterDataCollection, config) ->
   $scope.finished = false
   $scope.institutes = []
-  $scope.rooms = new semesterDataCollection "rooms", $scope, {
+  $scope.rooms = new semesterDataCollection {
+    scope: $scope.$new()
+    connection: "'rooms'"
     nameOfItem: "name"
     nameOfDatabase: "Raum"
     useDiffs: true

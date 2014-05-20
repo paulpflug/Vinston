@@ -1,32 +1,94 @@
 angular.module('interfaces')
 .factory "semesterData", ($rootScope,$filter,$q,generate,clean,toaster) ->
   class semesterData
-    constructor: (dataname, scope, options, query) ->
+    constructor: (options) ->
       d = $q.defer()
       self = @
       @loaded = d.promise
       @busy = false
       @changed = false
-      @dataname = dataname
       @options = {
         nameOfItem : "name"
         idOfItem : "_id"
         nameOfDatabase : ""
+        showDeleted : false
         singleItem: false
+        filterBy: {}
+        query: {}
+        scope: $rootScope.$new()
+        connection:""
       }
       angular.extend(@options,options)
-
-      if query
-        @query = query
-      else
-        @query = {}
+      @inconsistent = false
       @status = ""
       @statusText = ""
       @type = ""
-      @socket = io.connect("/"+dataname)
-      scope.$on("$destroy", () -> self.socket.disconnect())
+      self.connect()
+      self.options.scope.$watch(self.options.connection,() -> self.connect(self))
+      self.options.scope.$on("$destroy", () -> self.socket.disconnect())
+      self.updateQuery(self.options.query)
+      for k,v in self.options.filterBy
+        self.options.scope.$watch(v,(() -> self.updateQuery(self.options.query, self)),true)
       self.reload().finally(d.resolve)
-          
+
+    updateQuery: (query,self) ->
+      self = @ if not self
+      query = {} if not query
+      query.find = {} if not query.find
+      query.find = clean.filter(query.find)    
+      if not self.options.showDeleted
+        query.find.deleted = false
+      for k,v in self.options.filterBy
+        self.options.query.find[k] = self.options.scope.$eval(v)
+      return query
+
+    connect: (self) ->
+      self = @ if not self
+      if self.socket
+        self.socket.disconnect()
+      self.socket = io.connect("/"+self.options.scope.$eval(self.options.connection))    
+      self.socket.on "inserted", (id) ->
+        if(self.after >= self.totalCount)
+          query = {find:{}}
+          query.find[self.options.idOfItem] = id
+          self.find(query).then (response) ->
+            if response and response.success
+              self.addLocally(response.content)
+              toaster.pop "info", self.options.nameOfDatabase + " hinzugefügt", self.getName(response.content) + " wurde hinzugefügt."   
+      self.socket.on "updated", (id) ->
+        index = _.findIndex self.data, (item) -> item[self.options.idOfItem] == id
+        query = {find:{}}
+        query.find[self.options.idOfItem] = id
+        if index > -1   
+          self.find(query).then (response) ->
+            if response and response.success
+              newdata = response.content
+              olddata = self.data[index]        
+              s = self.getName(olddata) + " wurde" 
+              if newdata.deleted
+                if !self.options.showDeleted
+                  index = self.data.indexOf olddata
+                  self.removeLocally index
+                toaster.pop "info", self.options.nameOfDatabase + " entfernt", s+" entfernt."   
+              else
+                if self.getName(newdata) != self.getName(olddata)
+                  s += " zu "+ self.getName(newdata)
+                s+= " verändert."
+                toaster.pop "info", self.options.nameOfDatabase + " verändert", s   
+                index = self.data.indexOf olddata
+                self.data[index] = newdata
+        else
+          toaster.pop "info", self.options.nameOfDatabase + " verändert", self.getName(newdata)+ " wurde verändert"
+          self.count()
+      self.socket.on "deleted", (id) ->
+        index = _.findIndex self.data, (item) -> item[self.options.idOfItem] == id
+        if index > -1     
+          olddata = self.data[index]     
+          toaster.pop "info", self.options.nameOfDatabase + " entfernt", self.getName(olddata) + " wurde entfernt"   
+          index = self.data.indexOf olddata
+          self.removeLocally index
+
+
     getName: (item) ->
       self = @
       if item[self.options.nameOfItem]
@@ -39,7 +101,7 @@ angular.module('interfaces')
       d = $q.defer()
       token = generate.token()
       self.busy = true
-      self.socket.emit "find", {content: query, token: token}
+      self.socket.emit "find", {content: self.updateQuery(query), token: token}
       self.socket.once "find." + token, (response) ->
         if response
           d.resolve(response)
@@ -48,7 +110,7 @@ angular.module('interfaces')
         self.busy = false
       return d.promise
 
-    reload: (query) ->
+    reload: () ->
       console.log "reloading .."
       d = $q.defer()
       self = @
@@ -58,11 +120,7 @@ angular.module('interfaces')
       else
         self.data = []
         self.unchangedData = []
-      if query
-        self.query = query
-      else
-        query = self.query
-      self.find(query).then(
+      self.find(self.options.query).then(
         ((response) ->
           if response.success and response.content  
             for item in response.content      
@@ -117,7 +175,7 @@ angular.module('interfaces')
       self = @
       diff = self.getChanges(arrayItem)
       arrayItem.changed = if diff then true else false
-      $rootScope.$$phase || $rootScope.$apply()
+
                   
     unchange: (arrayItem) ->
       self = @
@@ -164,7 +222,7 @@ angular.module('interfaces')
           self.setLocally(response.content)
             
           toaster.pop "success", "Erfolg", self.getName(arrayItem) + " wurde gespeichert."
-          $rootScope.$$phase || $rootScope.$apply()
+
         else
           toaster.pop "error", "Fehler" , ""
 
@@ -179,7 +237,7 @@ angular.module('interfaces')
           if !self.options.showDeleted
             index = self.data.indexOf item
             self.removeLocally(index)
-          $rootScope.$$phase || $rootScope.$apply()
+
         else
           item.deleted = false
           toaster.pop "error", "Fehler", ""
@@ -191,7 +249,6 @@ angular.module('interfaces')
       .then (data) ->
         if response.success
           toaster.pop "success", "Erfolg", self.getName(item) + " wurde hinzugefügt."  
-          $rootScope.$$phase || $rootScope.$apply()
         else
           item.deleted = true
           toaster.pop "error", "Fehler", ""
@@ -207,8 +264,7 @@ angular.module('interfaces')
           else
             index = self.data.indexOf item
             self.removeLocally(index)
-          toaster.pop "success", "Erfolg", self.getName(item) + " wurde entfernt."
-          $rootScope.$$phase || $rootScope.$apply()        
+          toaster.pop "success", "Erfolg", self.getName(item) + " wurde entfernt."      
         else
           toaster.pop "error", "Fehler", ""
 
@@ -226,6 +282,7 @@ angular.module('interfaces')
       else
         self.data.push arrayItem
         self.unchangedData.push(_.cloneDeep(arrayItem))
+      $rootScope.$$phase || $rootScope.$apply()
 
     setLocally: (arrayItem,index) ->
       self = @
@@ -250,6 +307,7 @@ angular.module('interfaces')
               self.data[indexnew] = _.cloneDeep(arrayItem)
             else
               self.setInconsistent()
+      $rootScope.$$phase || $rootScope.$apply()
 
 
     removeLocally: (index) ->
@@ -260,3 +318,4 @@ angular.module('interfaces')
       else
         self.data.splice index,1
         self.unchangedData.splice index,1
+      $rootScope.$$phase || $rootScope.$apply()

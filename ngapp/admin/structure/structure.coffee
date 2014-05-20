@@ -1,18 +1,14 @@
 angular.module("StructureModule",["oc.lazyLoad","ui.tree"])
 .controller "structureCtrl", ($scope, $filter,$q , semesterData,session, generate) ->
   $scope.finished = false
-  $scope.structure = new semesterData "structure", $scope, {
+  $scope.structure = new semesterData {
+    connection: "'structure'"
+    filterBy: {institute:"session.getActiveInstitute().name"}
+    scope: $scope.$new()
     nameOfItem: "name"
     nameOfDatabase: "Struktur"
     singleItem: true
-    },{find:{institute:session.getActiveInstitute().name}}
-  $scope.$watch "session.getActiveInstitute()",
-    (() -> 
-      $scope.structure.reload {
-        find:
-          institute:session.getActiveInstitute().name
-        }
-      .then $scope.addRootElement),true
+    }
   $q.all([$scope.structure.loaded])
   .then $scope.addRootElement
   .finally () ->  
@@ -30,8 +26,6 @@ angular.module("StructureModule",["oc.lazyLoad","ui.tree"])
       delete event.source.nodeScope.$modelValue.$$hashKey
       if event.source.nodesScope != event.dest.nodesScope
         $scope.save()
-
-
   }
   $scope.save = () -> 
     $scope.structure.save().then () ->

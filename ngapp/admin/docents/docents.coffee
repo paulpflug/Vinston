@@ -4,7 +4,9 @@ angular.module("DocentsModule",["oc.lazyLoad",
 .controller "docentsCtrl", ($scope, $filter, $q, $modal, semesterDataCollection, config) ->
   $scope.finished = false
   $scope.institutes = []
-  $scope.docents = new semesterDataCollection "docents", $scope, {
+  $scope.docents = new semesterDataCollection {
+    scope: $scope.$new()
+    connection: "'docents'"
     nameOfItem: "name"
     nameOfDatabase: "Dozent"
     useDiffs: true

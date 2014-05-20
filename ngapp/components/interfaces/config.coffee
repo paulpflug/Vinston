@@ -10,7 +10,6 @@ angular.module('interfaces')
       get(name,true)
       .then (response) ->
         if response.success
-          console.log updatecbs
           for cb in updatecbs
             cb()
   updateItem = (name,response) ->
@@ -25,7 +24,6 @@ angular.module('interfaces')
     return getter[name] if getter[name]
     d = $q.defer()
     getter[name] = d.promise
-    console.log config[name]
     if config[name] and config[name].success and !update
       d.resolve(config[name])
       delete getter[name]
