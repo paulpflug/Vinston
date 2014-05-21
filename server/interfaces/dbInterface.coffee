@@ -1,4 +1,5 @@
 mongoose = require "mongoose"
+Schema = mongoose.Schema
 Q = require "q"
 _ = require "lodash"
 
@@ -21,13 +22,22 @@ module.exports = {
       console.log "disconnected mongoDB"
       d.resolve()
     return d.promise
-  expose: (io,Model) ->
+  expose: (io,Model,name) ->
     allowedFields = {}
-    model = mongoose.model Model.name
+    if not name
+      name = Model.name
+    model = mongoose.model name, Model.schema
     if Model.history
-      modelVersions = mongoose.model Model.name+"Versions"
-    console.log "exposing "+Model.name
-    io.of("/" + Model.name).on "connection", (client) ->
+      versionSchema = new Schema(
+        parentId: String
+        version: Number
+        changes: { type: Array, default: [] }
+        updated: type: Date
+        updatedBy: { type: String, default: "" }
+      )
+      modelVersions = mongoose.model(name+"Versions", versionSchema)
+    console.log "exposing "+name
+    io.of("/" + name).on "connection", (client) ->
       getAllowedFields = (mode) ->
         mode = "read" if not mode
         if client.handshake.user and client.handshake.user.group

@@ -2,7 +2,7 @@ angular.module("StructureModule",["oc.lazyLoad","ui.tree"])
 .controller "structureCtrl", ($scope, $filter,$q , semesterData,session, generate) ->
   $scope.finished = false
   $scope.structure = new semesterData {
-    connection: "'structure'"
+    connection: "'structure.'+session.getActiveSemester().name"
     filterBy: {institute:"session.getActiveInstitute().name"}
     scope: $scope.$new()
     nameOfItem: "name"
@@ -10,7 +10,6 @@ angular.module("StructureModule",["oc.lazyLoad","ui.tree"])
     singleItem: true
     }
   $q.all([$scope.structure.loaded])
-  .then $scope.addRootElement
   .finally () ->  
     $scope.finished = true
   $scope.addRootElement = () ->
@@ -19,8 +18,10 @@ angular.module("StructureModule",["oc.lazyLoad","ui.tree"])
         institute: session.getActiveInstitute().name
         nodes: [{name:"",nodes:[]}]
       }
+      $scope.save()
     if $scope.structure.data.nodes and $scope.structure.data.nodes.length == 0 
       $scope.structure.data.nodes.push([{name:"",nodes:[]}])
+      $scope.save()
   $scope.treeOptions = {
     dropped: (event) ->
       delete event.source.nodeScope.$modelValue.$$hashKey

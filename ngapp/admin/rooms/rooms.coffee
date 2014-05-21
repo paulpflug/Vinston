@@ -3,12 +3,12 @@
 angular.module("RoomsModule",["oc.lazyLoad",
    "infinite-scroll",
    "localytics.directives"])
-.controller "roomsCtrl", ($scope, $filter,$q , $modal, semesterDataCollection, config) ->
+.controller "roomsCtrl", ($scope, $filter,$q , $modal,session, semesterDataCollection, config) ->
   $scope.finished = false
   $scope.institutes = []
   $scope.rooms = new semesterDataCollection {
     scope: $scope.$new()
-    connection: "'rooms'"
+    connection: "'rooms.'+session.getActiveSemester().name"
     nameOfItem: "name"
     nameOfDatabase: "Raum"
     useDiffs: true
@@ -32,4 +32,4 @@ angular.module("RoomsModule",["oc.lazyLoad",
   .then (results) ->
     if results[0] and results[0].success and results[0].content
       $scope.institutes = results[0].content
-    $scope.finished = true
+  .finally () ->  $scope.finished = true 

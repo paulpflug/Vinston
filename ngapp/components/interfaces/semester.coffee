@@ -8,7 +8,8 @@ angular.module('interfaces')
       backdrop: backdrop
       keyboard: staticModal
       templateUrl: "indexSemesters.html"
-      controller: "semestersCtrl"        
+      controller: "semestersCtrl"
+      size: "sm"        
       resolve: {
         activeSemester: () -> return session.getActiveSemester()
       }

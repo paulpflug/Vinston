@@ -19,51 +19,59 @@ angular.module('interfaces')
 
     reload: () ->
       d = $q.defer()
+      console.log "reloading.."
       self = @
       self.data = []
       self.unchangedData = []
-      self.count().then(d.resolve,d.reject)
+      self.next().then(d.resolve,d.reject)
       return d.promise
 
-    count: () ->
+    count: (query) ->
       self = @
       d = $q.defer()
       token = generate.token()
-      query = self.options.query
-      return if self.busy
-      self.busy = true
-      self.socket.emit "count", {content: query, token:token} 
-      self.socket.once "count." + token, (response) ->
-        if response and response.success and response.content
-          self.totalCount = response.content
-          self.after = $filter("filter")(self.data,self.filter,"true").length
-          if(self.after < self.totalCount)
-            query.options = {skip:self.after,limit:20}
-            self.find query
-            .then (response) ->
-              if response and response.success and response.content
-                self.disabled = false
-                for data in response.content
-                  index = _.findIndex self.data, (item) -> item[self.options.idOfItem] == data[self.options.idOfItem]
-                  if index > -1
-                    console.log "count"
-                    console.log self.data
-                    self.setInconsistent()
-                    return
-                  else
-                    self.addLocally data
-                if self.inconsistent
-                  toaster.pop "success", "Inkonsistenz beseitigt", "Neu geladen - die Daten sind nun konsistent"
-                  self.inconsistent = false
-                self.after += 20
-                $rootScope.$$phase || $rootScope.$apply()
-                d.resolve()        
+      if not self.busy
+        self.busy = true
+        query = self.options.query if not query
+        self.socket.emit "count", {content: query, token:token} 
+        self.socket.once "count." + token, (response) ->
+          self.busy = false
+          if response and response.success
+            self.totalCount = response.content
+            self.after = $filter("filter")(self.data,self.filter,"true").length
+            if(self.after < self.totalCount)
+              query.options = {skip:self.after,limit:20}
+              d.resolve(query)
+            else
+              d.reject()
           else
-            self.disabled = false
-            
-            d.resolve()
-        else
-          d.reject()
+            d.reject()
+      else
+        d.reject()
+      return d.promise
+
+    next: () ->
+      self = @
+      d = $q.defer()
+      token = generate.token()
+      self.count()
+      .then self.find 
+      .then (response) ->
+        if response and response.success and response.content
+          for data in response.content
+            index = _.findIndex self.data, (item) -> item[self.options.idOfItem] == data[self.options.idOfItem]
+            if index > -1
+              self.setInconsistent()
+              return
+            else
+              self.addLocally data
+          if self.inconsistent
+            toaster.pop "success", "Inkonsistenz beseitigt", "Neu geladen - die Daten sind nun konsistent"
+            self.inconsistent = false
+          self.after += 20
+      .finally () ->
+        d.resolve()
+        $rootScope.$$phase || $rootScope.$apply()
       return d.promise
 
     updateFilter: () ->
@@ -71,7 +79,7 @@ angular.module('interfaces')
       for k,v of self.filter
         if !v or (angular.isArray(v) and v.length == 0)
           delete self.filter[k]
-      self.count()
+      self.next()
       
     insert: (arrayItem) ->
       self = @

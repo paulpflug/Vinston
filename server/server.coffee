@@ -15,10 +15,11 @@ configInterface = require "./interfaces/configInterface.coffee"
 users = require "./models/usersModel.coffee"
 authInterface = require "./interfaces/authInterface.coffee"
 
-models = ["./models/roomsModel.coffee",
-          "./models/docentsModel.coffee",
-          "./models/structureModel.coffee"
-        ]
+models = {
+  rooms: "./models/roomsModel.coffee",
+  docents: "./models/docentsModel.coffee",
+  structure: "./models/structureModel.coffee"
+}
 dbInterface = require "./interfaces/dbInterface.coffee"
 
 
@@ -47,11 +48,10 @@ startup = () ->
   configInterface.expose(io, config)
   dbInterface.connectDB(config)
   .then () ->
-    expose = (model) -> 
+    for name,model of models
       Model = require(model)
-      dbInterface.expose(io, Model)
-    for model in models
-      expose(model)
+      for sem in config.get("semesters").content
+        dbInterface.expose(io, Model,Model.name+"."+sem.name)
     authInterface.expose(io,users)
   .done () -> console.log "started up"; d.resolve()
   return d.promise

@@ -141,4 +141,5 @@ module.exports = {
   getDBconnection: getDBconnection
   getByPermission: getByPermission
   set: set
+  get: get
 }

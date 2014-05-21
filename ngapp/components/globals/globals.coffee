@@ -42,14 +42,14 @@ mod.factory "generate", () ->
       @ids = []
 
     token: (length) ->
+      length = 3 if not length
+      length = 15 if length>15
+      length = 1 if length<1
       number = 0
       while number == 0 or number == 1
         number = Math.random()
       token = number.toString(36).substr(2)
-      if length
-        return token.substr(0,length)
-      else
-        return token
+      return token.substr(0,length)
 
     id: (length) ->
       length = 6 if not length

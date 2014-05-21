@@ -1,8 +1,7 @@
-mongoose = require "mongoose"
+Schema = require("mongoose").Schema
 deleted = require "./../mongoosePlugins/deleted.coffee"
 versions = require "./../mongoosePlugins/versions.coffee"
-Schema = mongoose.Schema
-modelName = "rooms"
+
 roomSchema = new Schema(
   name:
     type: String
@@ -36,10 +35,10 @@ roomSchema = new Schema(
     write: "admin"
 )
 roomSchema.plugin(deleted)
-roomSchema.plugin(versions,{modelName:modelName})
-mongoose.model(modelName, roomSchema)
+roomSchema.plugin(versions)
 module.exports = {
-  name: modelName
+  name: "rooms"
+  schema: roomSchema
   findRestriction:
     root:{}
     all:

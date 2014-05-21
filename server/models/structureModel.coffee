@@ -1,6 +1,5 @@
-mongoose = require "mongoose"
-Schema = mongoose.Schema
-modelName = "structure"
+Schema = require("mongoose").Schema
+
 node = new Schema(
   name: 
     type: String
@@ -18,8 +17,8 @@ structureSchema = new Schema(
     write: "admin"
 )
 
-mongoose.model(modelName, structureSchema)
 module.exports = {
-  name: modelName
+  name: "structure"
+  schema: structureSchema
   remove: "root"
 }

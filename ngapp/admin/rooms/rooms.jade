@@ -5,7 +5,8 @@ include /components/mixins/form.jade
 #rooms(ng-controller="roomsCtrl" ng-cloak)
   +spinner()
   table.table.table-striped(
-    infinite-scroll="rooms.count()"
+    ng-show="finished"
+    infinite-scroll="rooms.next()"
     infinite-scroll-distance=2
     infinite-scroll-disabled="busy")
     thead

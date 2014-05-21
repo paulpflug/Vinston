@@ -36,8 +36,13 @@ link(rel='stylesheet', href='/admin/structure/structure.css')
         ui-tree-node ng-include="'nodes_renderer.html'")
 
   +spinner()
-  .tree(ui-tree="treeOptions")
-    ol(ui-tree-nodes="" 
-      ng-model="structure.data.nodes")
-      li(ng-repeat="node in structure.data.nodes" 
-        ui-tree-node ng-include="'nodes_renderer.html'")
+  .stuff(ng-show="finished")
+    +iconButton("Hinzufügen","fa-plus").btn-primary(
+      ng-show="!structure.data.nodes || structure.data.nodes.length==0"
+      ng-click="addRootElement()")
+    .tree(ui-tree="treeOptions"
+      ng-hide="!structure.data.nodes || structure.data.nodes.length==0")
+      ol(ui-tree-nodes="" 
+        ng-model="structure.data.nodes")
+        li(ng-repeat="node in structure.data.nodes" 
+          ui-tree-node ng-include="'nodes_renderer.html'")

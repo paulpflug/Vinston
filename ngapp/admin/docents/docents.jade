@@ -5,7 +5,8 @@ include /components/mixins/form.jade
 #docents(ng-controller="docentsCtrl" ng-cloak)
   +spinner()
   table.table.table-striped(
-    infinite-scroll="docents.count()"
+    ng-show="finished"
+    infinite-scroll="docents.next()"
     infinite-scroll-distance=2
     infinite-scroll-disabled="busy")
     thead

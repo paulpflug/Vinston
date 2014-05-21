@@ -6,7 +6,7 @@ angular.module("DocentsModule",["oc.lazyLoad",
   $scope.institutes = []
   $scope.docents = new semesterDataCollection {
     scope: $scope.$new()
-    connection: "'docents'"
+    connection: "'docents.'+session.getActiveSemester().name"
     nameOfItem: "name"
     nameOfDatabase: "Dozent"
     useDiffs: true
@@ -17,5 +17,5 @@ angular.module("DocentsModule",["oc.lazyLoad",
   .then (results) ->
     if results[0] and results[0].success and results[0].content
       $scope.institutes = results[0].content
-    $scope.finished = true
+  .finally () ->  $scope.finished = true
  

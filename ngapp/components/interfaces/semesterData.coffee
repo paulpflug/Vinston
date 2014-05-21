@@ -24,26 +24,31 @@ angular.module('interfaces')
       @statusText = ""
       @type = ""
       self.connect()
-      self.options.scope.$watch(self.options.connection,() -> self.connect(self))
-      self.options.scope.$on("$destroy", () -> self.socket.disconnect())
+      self.options.scope.$watch self.options.connection,() -> 
+        connect = angular.bind(self,self.connect)
+        reload = angular.bind(self,self.reload)
+        connect().then(reload)
+      self.options.scope.$on "$destroy", () -> self.socket.disconnect()
       self.updateQuery(self.options.query)
-      for k,v in self.options.filterBy
-        self.options.scope.$watch(v,(() -> self.updateQuery(self.options.query, self)),true)
+      for k,v of self.options.filterBy
+        self.options.scope.$watch v, () -> 
+          angular.bind(self,self.updateQuery)(self.options.query)
+          angular.bind(self,self.reload)()          
       self.reload().finally(d.resolve)
 
-    updateQuery: (query,self) ->
-      self = @ if not self
+    updateQuery: (query) ->
+      self = @ 
       query = {} if not query
       query.find = {} if not query.find
       query.find = clean.filter(query.find)    
       if not self.options.showDeleted
         query.find.deleted = false
-      for k,v in self.options.filterBy
-        self.options.query.find[k] = self.options.scope.$eval(v)
+      for k,v of self.options.filterBy
+        query.find[k] = self.options.scope.$eval(v)
       return query
 
-    connect: (self) ->
-      self = @ if not self
+    connect: () ->
+      self = @ 
       if self.socket
         self.socket.disconnect()
       self.socket = io.connect("/"+self.options.scope.$eval(self.options.connection))    
@@ -87,6 +92,9 @@ angular.module('interfaces')
           toaster.pop "info", self.options.nameOfDatabase + " entfernt", self.getName(olddata) + " wurde entfernt"   
           index = self.data.indexOf olddata
           self.removeLocally index
+      d = $q.defer()
+      d.resolve()
+      return d.promise
 
 
     getName: (item) ->
@@ -113,7 +121,7 @@ angular.module('interfaces')
     reload: () ->
       console.log "reloading .."
       d = $q.defer()
-      self = @
+      self = @ if not self
       if @options.singleItem
         self.data = {}
         self.unchangedData = {}
