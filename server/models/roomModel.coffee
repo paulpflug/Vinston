@@ -18,21 +18,28 @@ roomSchema = new Schema(
   capacity:
     type: Number
     min: 1
+    read: "all"
+    write: "admin"
   institute: 
     type: String
     default: ""
     read: "all"
     write: "admin"
   secInstitutes: 
-    type: Array
+    type: [String]
     default: []
     read: "docent"
     write: "admin"
   conditionalInstitutes: 
-    type: Array
+    type: [String]
     default: []
     read: "docent"
     write: "admin"
+  bookable:
+    type: String
+    read: "student"
+    write: "admin"
+
 )
 roomSchema.plugin(deleted)
 roomSchema.plugin(versions)

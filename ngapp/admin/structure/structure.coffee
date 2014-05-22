@@ -2,7 +2,7 @@ angular.module("StructureModule",["oc.lazyLoad","ui.tree"])
 .controller "structureCtrl", ($scope, $filter,$q , semesterData,session, generate) ->
   $scope.finished = false
   $scope.structure = new semesterData {
-    connection: "'structure.'+session.getActiveSemester().name"
+    connection: "'structures.'+session.getActiveSemester().name"
     filterBy: {institute:"session.getActiveInstitute().name"}
     scope: $scope.$new()
     nameOfItem: "name"

@@ -18,7 +18,7 @@ structureSchema = new Schema(
 )
 
 module.exports = {
-  name: "structure"
+  name: "structures"
   schema: structureSchema
   remove: "root"
 }

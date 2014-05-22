@@ -12,13 +12,16 @@ Q = require "q"
 config = require "./models/configModel.coffee"
 configInterface = require "./interfaces/configInterface.coffee"
 
-users = require "./models/usersModel.coffee"
+users = require "./models/userModel.coffee"
 authInterface = require "./interfaces/authInterface.coffee"
 
 models = {
-  rooms: "./models/roomsModel.coffee",
-  docents: "./models/docentsModel.coffee",
-  structure: "./models/structureModel.coffee"
+  rooms: "./models/roomModel.coffee"
+  docents: "./models/docentModel.coffee"
+  structures: "./models/structureModel.coffee"
+  roomBookings: "./models/roomBookingModel.coffee"
+  courses: "./models/courseModel.coffee"
+  audiences: "./models/audienceModel.coffee"
 }
 dbInterface = require "./interfaces/dbInterface.coffee"
 
