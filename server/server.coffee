@@ -53,8 +53,10 @@ startup = () ->
   .then () ->
     for name,model of models
       Model = require(model)
-      for sem in config.get("semesters").content
-        dbInterface.expose(io, Model,Model.name+"."+sem.name)
+      semesters = config.get("semesters")
+      if semesters.success and semesters.content
+        for sem in config.get("semesters").content
+          dbInterface.expose(io, Model,Model.name+"."+sem.name)
     authInterface.expose(io,users)
   .done () -> console.log "started up"; d.resolve()
   return d.promise
