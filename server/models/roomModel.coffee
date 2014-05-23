@@ -39,7 +39,10 @@ roomSchema = new Schema(
     type: String
     read: "student"
     write: "admin"
-
+  freeToUse:
+    type: Boolean
+    read: "all"
+    write: "admin"
 )
 roomSchema.plugin(deleted)
 roomSchema.plugin(versions)

@@ -1,6 +1,4 @@
-"use strict"
-
-angular.module("AppConfigModule",["oc.lazyLoad","ui.sortable"])
+angular.module "RootModule"
 .controller "appConfigCtrl", ($scope, $q,configData, toaster) ->
   activeSetter = (name) ->
     return (newValue, oldValue) ->

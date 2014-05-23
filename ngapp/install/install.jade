@@ -11,7 +11,7 @@ html.no-js
     title Vinston
     meta(name="description",content="")
     meta(name="viewport",content="width=device-width")
-    // build:css styles/vendor.css
+    // build:css vendor/vendor.css
     // bower:css
     link(rel='stylesheet', href='/vendor/bootstrap/dist/css/bootstrap.css')
     link(rel='stylesheet', href='/vendor/AngularJS-Toaster/toaster.css')
@@ -19,8 +19,8 @@ html.no-js
     link(rel='stylesheet', href='/vendor/chosen/chosen.css')
     link(rel='stylesheet', href='/vendor/font-awesome/css/font-awesome.css')
     // endbuild 
-    // build:css({.tmp,app}) styles/main.css 
-    link(rel='stylesheet', href='/root/install/install.css')
+    // build ngapp_compiled/install/install.css 
+    link(rel='stylesheet', href='/install/install.css')
     // endbuild 
   body.container(ng-app="installApp",ng-controller="appCtrl")
     // [if lt IE 7]>
@@ -134,9 +134,9 @@ html.no-js
     script(src='/vendor/deep-diff/index.js')
     // endbuild
         
-    // build:js({.tmp,app}) scripts/scripts.js 
+    // build:js ngapp_compiled/install/install.js 
     script(src="components/modules.js")
     script(src="components/globals/globals.js")
     script(src="components/interfaces/config.js")
-    script(src="/root/install/install.js")
+    script(src="/install/install.js")
     // endbuild 

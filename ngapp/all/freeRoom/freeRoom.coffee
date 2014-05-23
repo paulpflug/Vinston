@@ -1,3 +1,3 @@
 angular.module "AllModule"
-.controller "vlvzCtrl", ($scope) ->
+.controller "freeRoomCtrl", ($scope) ->
   $scope.finished = false

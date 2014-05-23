@@ -1,129 +1,199 @@
 {
-  "nav": [
-    {
-      "name":"student",
+  "modules" :  {
+    "app": {
+      "path" : "",
+      "files" : [        
+        "index.js",
+        "indexInstitutes.js",
+        "indexLogin.js",
+        "indexSemesters.js",
+        "header.js",
+        "main.js"
+      ],
+      "concat" : [
+        "app.js"
+      ]
+    },
+    "components": {
+      "path" : "components/",
+      "files" : [
+        "modules.js",
+        "globals/globals.js",
+        "interfaces/auth.js",
+        "interfaces/config.js",
+        "interfaces/configData.js",
+        "interfaces/institute.js",
+        "interfaces/semester.js",
+        "interfaces/semesterData.js",
+        "interfaces/semesterDataCollection.js",
+        "interfaces/session.js",
+        "interfaces/userData.js"
+      ],
+      "concat" : [
+        "components.js"
+      ]
+    },
+    "all": {
+      "path" : "all/",
+      "files" : [
+        "all.js",
+        "freeRoom/freeRoom.js",
+        "vlvz/vlvz.js"
+      ],
+      "concat" : [
+        "all.js"
+      ]
+    },
+    "student": {
+      "path" : "student/",
+      "files" : [
+        "student.js",
+        "student/student.js",
+        "bookRoom/bookRoom.js"
+      ],
+      "concat" : [
+        "student.js"
+      ]
+    },
+    "docent": {
+      "path" : "docent/",
+      "files" : [
+        "docent.js",
+        "docent/docent.js",
+        "registration/registration.js"
+      ],
+      "concat" : [
+        "docent.js"
+      ]
+    },
+    "admin": {
+      "path" : "admin/",
+      "files" : [
+        "admin.js",
+        "docents/docents.js",
+        "rooms/rooms.js",
+        "structure/structure.js"
+      ],
+      "concat" : [
+        "admin.js"
+      ]
+    },
+    "root": {
+      "path" : "root/",
+      "files" : [
+        "root.js",
+        "appConfig/appConfig.js",
+        "import/import.js",
+        "serverConfig/serverConfig.js"
+      ],
+      "concat" : [
+        "root.js"
+      ]
+    }
+  },
+  "nav": {
+    "student": {
       "pretty":"Student",
       "visible":"true",
       "path":"#/student/",
-      "functions":[
-        {
-          "name":"main",
+      "functions": {
+        "student": {
           "pretty":"Mein Stundenplan",
           "icon":"fa-table"
         },
-        {
-          "name":"bookRoom",
+        "bookRoom": {
           "pretty":"Raum buchen",
           "icon":"fa-building-o"
         },
-        {
-          "name":"freeRoom",
+        "freeRoom": {
           "path":"#/all/",
           "pretty":"Freien Raum finden",
           "icon":"fa-search"
         },
-        {
-          "name":"vlvz",
+        "vlvz": {
           "path":"#/all/",
           "pretty":"Vorlesungsverzeichnis",
           "icon":"fa-list-alt"
         }
-      ]
+      }
     },
-    {
-      "name":"docent",
+    "docent": {
       "pretty":"Dozent",
       "visible":"auth.inGroup('docent')",
       "path":"#/docent/",
-      "functions":[
-        {
-          "name":"main",
+      "functions":{
+        "docent": {
           "pretty":"Mein Stundenplan",
           "icon":"fa-table"
         },
-        {
-          "name":"bookRoom",
+        "bookRoom": {
           "path":"#/student/",
           "pretty":"Raum buchen",
           "icon":"fa-building-o"
         },
-        {
-          "name":"registration",
+        "registration": {
           "pretty":"Zumeldung",
           "icon":"fa-pencil"
         }
-      ]
+      }
     },
-    {
-      "name":"admin",
+    "admin": {
       "pretty":"Administrator",
       "visible":"auth.inGroup('admin')",
       "path":"#/admin/",
-      "functions":[
-        {
-          "name":"rooms",
+      "functions":{
+        "rooms": {
           "pretty":"Räume",
           "icon":"fa-building-o"
         },
-        {
-          "name":"docents",
+        "docents": {
           "pretty":"Dozenten",
           "icon":"fa-users"
         },
-        {
-          "name":"structure",
+        "structure": {
           "pretty":"Struktur",
           "icon":"fa-sitemap"
         },
-        {
-          "name":"roomBookings",
+        "roomBookings": {
           "pretty":"Raumbuchungen",
           "icon":"fa-list-alt"
         }
-      ]
+      }
     },
-    {
-      "name":"root",
+    "root": {
       "pretty":"Root",
       "visible":"auth.inGroup('root')",
       "path":"#/root/",
       "functions":{
         "helpUser":{
-          "name":"helpUser",
           "pretty":"Benutzer helfen",
           "icon":"fa-medkit"
         },
         "planning":{
-          "name":"planning",
           "pretty":"Planung",
           "icon":"fa-table"
         },
         "his":{
-          "name":"his",
           "pretty":"HIS export",
           "icon":"fa-cloud-download"
         },
         "import":{
-          "name":"import",
           "pretty":"Datenbank import",
           "icon":"fa-cloud-upload"
         },
         "users":{
-          "name":"users",
           "pretty":"Benutzer verwalten",
           "icon":"fa-users"
         },
         "appConfig":{
-          "name":"appConfig",
           "pretty":"App konfiguration",
           "icon":"fa-cogs"
         },
         "serverConfig":{
-          "name":"serverConfig",
           "pretty":"Server konfiguration",
           "icon":"fa-cog"
         }
       }
     }
-  ]
+  }
 }

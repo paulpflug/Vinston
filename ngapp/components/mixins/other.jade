@@ -2,3 +2,7 @@ mixin spinner()
   #startup.well(ng-hide="finished")
     i.fa.fa-spinner.fa-spin.fa-2x
     block
+mixin heading(name)
+  div(id=name,ng-controller=name+"Ctrl",ng-cloak)&attributes(attributes)
+    +spinner()
+    block

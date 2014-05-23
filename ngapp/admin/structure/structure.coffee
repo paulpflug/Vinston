@@ -1,4 +1,4 @@
-angular.module("StructureModule",["oc.lazyLoad","ui.tree"])
+angular.module "AdminModule"
 .controller "structureCtrl", ($scope, $filter,$q , semesterData,session, generate) ->
   $scope.finished = false
   $scope.structure = new semesterData {

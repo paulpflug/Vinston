@@ -1,10 +1,8 @@
 include /components/mixins/buttons.jade
 include /components/mixins/panel.jade
 include /components/mixins/form.jade
-#config(ng-controller="serverConfigCtrl" 
-  ng-cloak
-  ng-show="loaded")
-  i.fa.fa-spinner.fa-spin.fa-2x(ng-hide="loaded")
+include /components/mixins/other.jade
++heading("serverConfig")
   +panel("Datenbank einrichten","active == 'connection'","active != 'connection'")
     form(
         name="connectionForm"

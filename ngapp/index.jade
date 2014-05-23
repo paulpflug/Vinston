@@ -13,7 +13,7 @@ html.no-js
     title Vinston
     meta(name="description",content="")
     meta(name="viewport",content="width=device-width")
-    // build:css styles/vendor.css
+    // build:css vendor/vendor.css
     // bower:css
     link(rel='stylesheet', href='../vendor/bootstrap/dist/css/bootstrap.css')
     link(rel='stylesheet', href='../vendor/AngularJS-Toaster/toaster.css')
@@ -21,11 +21,11 @@ html.no-js
     // endbower
     link(rel='stylesheet', href='vendor/chosen/chosen.css')
     link(rel='stylesheet', href='vendor/font-awesome/css/font-awesome.css')
-    // endbuild 
-    // build:css({.tmp,app}) styles/main.css 
+    // endbuild
+    // build:css ngapp_compiled/app.css
     link(rel="stylesheet" href="index.css")
     link(rel="stylesheet" href="main.css")
-    // endbuild 
+    // endbuild
   body.container(ng-app="vinstonApp",ng-controller="appCtrl")
     // [if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. 
@@ -44,14 +44,14 @@ html.no-js
         button#loginbutton.btn.btn-default.pull-right(ng-if="!angular.equals(session.getUser(),{})",ng-click="auth.showLoginModal()") Login
         button#userbutton.btn.btn-default.pull-right(ng-if="angular.equals(session.getUser(),{})")
           span Hi, {{session.getUser().name}}
-        for group in nav
+        each group, groupName in nav
           li.dropdown(ng-if=group.visible,style="margin-right:4px")
             a.dropdown-toggle(href)=group.pretty
               span.caret
             ul.dropdown-menu(role="menu")
-              for func in group.functions
+              each func, name in group.functions
                 li
-                  a(href=(func.path?func.path:group.path)+func.name)
+                  a(href=(func.path?func.path:group.path)+name)
                     if func.icon
                       i.fa.fa-fw(class=func.icon)
                     span=func.pretty
@@ -60,13 +60,9 @@ html.no-js
         li
           a(href="#") 
             i.fa.fa-home.fa-lg
-        for group in nav
-          for func in group.functions
-            li.active(ng-if="'"+func.name+"'==params.function")
-              span=func.name
-              if func.icon
-                i.fa.fa-fw(class=func.icon)
-              
+        li.active
+          span {{route.pretty}}
+          i.fa.fa-fw(ng-if="route.icon" ng-class="route.icon")         
             
     .row(ng-view,ng-cloak,ng-show="finished")
     toaster-container(toaster-options="{'time-out': 3000,'position-class':'toast-bottom-right'}")
@@ -103,21 +99,9 @@ html.no-js
     script(src='vendor/deep-diff/index.js')
     // endbuild
         
-    // build:js({.tmp,app}) scripts/scripts.js 
-    script(src="components/modules.js")
-    script(src="components/globals/globals.js")
-    script(src="components/interfaces/auth.js")
-    script(src="components/interfaces/config.js")
-    script(src="components/interfaces/configData.js")
-    script(src="components/interfaces/institute.js")
-    script(src="components/interfaces/semester.js")
-    script(src="components/interfaces/semesterData.js")
-    script(src="components/interfaces/semesterDataCollection.js")
-    script(src="components/interfaces/session.js")
-    script(src="components/interfaces/userData.js")
-    script(src="app.js")
-    script(src="index.js")
-    script(src="indexInstitutes.js")
-    script(src="indexSemesters.js")
-    script(src="indexLogin.js")
-    // endbuild 
+    // build:js ngapp_compiled/app.js
+    for file in modules.components.files
+      script(src=modules.components.path+file)
+    for file in modules.app.files
+      script(src=modules.app.path+file)
+    // endbuild

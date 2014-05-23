@@ -64,7 +64,7 @@ setup = (configInstalled) ->
   d = Q.defer()
   console.log "starting install"
   io = require("socket.io").listen(server)
-  rootRoute = "/root/install/install.html"
+  rootRoute = "/install/install.html"
   installInterface = require "./interfaces/installInterface.coffee"
   installInterface.exposeInstallInterface io,config, users,configInstalled
   .then () ->  

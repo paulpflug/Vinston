@@ -2,8 +2,7 @@ include /components/mixins/other.jade
 include /components/mixins/buttons.jade
 include /components/mixins/panel.jade
 include /components/mixins/form.jade
-#rooms(ng-controller="roomsCtrl" ng-cloak)
-  +spinner()
++heading("rooms")
   table.table.table-striped(
     ng-show="finished"
     infinite-scroll="rooms.next()"

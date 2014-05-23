@@ -1,4 +1,4 @@
-angular.module("ImportModule",["oc.lazyLoad","ui.ace"])
+angular.module "RootModule"
 .controller "importCtrl", ($scope,semesterData) ->
   $scope.finished = false
   $scope.aceOptions = {

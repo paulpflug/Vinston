@@ -1,6 +1,4 @@
-angular.module("DocentsModule",["oc.lazyLoad",
-   "infinite-scroll",
-   "localytics.directives"])
+angular.module "AdminModule"
 .controller "docentsCtrl", ($scope, $filter, $q, $modal, semesterDataCollection, config) ->
   $scope.finished = false
   $scope.institutes = []

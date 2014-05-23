@@ -1,6 +1,4 @@
-"use strict"
-
-angular.module("ServerConfigModule",["oc.lazyLoad"])
+angular.module "RootModule"
 .controller "serverConfigCtrl", ($scope, $q, config) ->
   socketConfig = io.connect("/config")
   $scope.loaded = false  

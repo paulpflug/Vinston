@@ -1,8 +1,4 @@
-"use strict"
-
-angular.module("RoomsModule",["oc.lazyLoad",
-   "infinite-scroll",
-   "localytics.directives"])
+angular.module "AdminModule"
 .controller "roomsCtrl", ($scope, $filter,$q , $modal,session, semesterDataCollection, config) ->
   $scope.finished = false
   $scope.institutes = []

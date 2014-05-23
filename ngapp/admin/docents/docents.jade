@@ -2,8 +2,7 @@ include /components/mixins/other.jade
 include /components/mixins/buttons.jade
 include /components/mixins/panel.jade
 include /components/mixins/form.jade
-#docents(ng-controller="docentsCtrl" ng-cloak)
-  +spinner()
++heading("docents")
   table.table.table-striped(
     ng-show="finished"
     infinite-scroll="docents.next()"

@@ -1,6 +1,7 @@
 # Generated on 2014-03-03 using generator-angular 0.7.1
 "use strict"
 path = require "path"
+util = require "util"
 # # Globbing
 # for performance reasons we're only matching one level down:
 # 'test/spec/{,*/}*.js'
@@ -10,7 +11,22 @@ module.exports = (grunt) ->
   
   # Load grunt tasks automatically
   require("load-grunt-tasks") grunt
-  
+  grunt.registerMultiTask "injectJson", "Inject json in js file" , () ->
+    this.files.forEach (file) ->
+      json = file.src[0].replace(/.js/i,".json").replace(/_compiled/i,"")
+      if grunt.file.exists(json)
+        console.log "found "+json
+        data = grunt.file.readJSON json
+        content = grunt.file.read file.src[0]
+        returnType = if /\r\n/.test(content) then '\r\n' else '\n';
+        formatedData = ["  // content from "+json+returnType]
+        for k,v of data
+          formatedData.push "  var "+k+" = "+util.inspect(v,{depth:null}).replace(/: /g,":")+";"+returnType
+        formatedData.push "  // end of content from "+json+returnType
+        formatedData = formatedData.join("")
+        content = content.replace(/\(function\(\) {/i,"(function() {"+returnType+formatedData)
+        grunt.file.write file.src[0], content
+
   # Time how long tasks take. Can help when optimizing build times
   require("time-grunt") grunt
   process.env.dirname = __dirname
@@ -35,6 +51,9 @@ module.exports = (grunt) ->
       jade:
         files: ["ngapp/**/*.jade"]
         tasks: ['newer:jade']
+      injectJson:
+        files: ["ngapp_compiled/**/*.js"]
+        tasks: ["newer:injectJson"]
       stylus:
         files: ["ngapp/**/*.styl"]
         tasks: ['newer:stylus','autoprefixer']
@@ -96,7 +115,14 @@ module.exports = (grunt) ->
           ext: ".css",
           dest: 'ngapp_compiled/'          
         ] 
-
+    injectJson:
+      compile:
+        files: [
+          expand: true,
+          cwd: 'ngapp_compiled/',
+          src: ['**/*.js'],
+          dest: 'ngapp_compiled/'          
+        ]
     # The actual grunt server settings
     express:
       options:
@@ -153,17 +179,13 @@ module.exports = (grunt) ->
     # concat, minify and revision files. Creates configurations in memory so
     # additional tasks can operate on them
     useminPrepare:
-      html: "<%= yeoman.app %>/index.html"
-      options:
-        dest: "<%= yeoman.dist %>"
+      html: ["ngapp_compiled/index.html"]
 
     
     # Performs rewrites based on rev and the useminPrepare configuration
     usemin:
-      html: ["<%= yeoman.dist %>/{,*/}*.html"]
-      css: ["<%= yeoman.dist %>/styles/{,*/}*.css"]
-      options:
-        assetsDirs: ["<%= yeoman.dist %>"]
+      html: ["ngapp_compiled/**/*.html"]
+      css: ["ngapp_compiled/**/*.css"]
 
     
     # The following *-min tasks produce minified files in the dist folder
@@ -195,34 +217,26 @@ module.exports = (grunt) ->
 
         files: [
           expand: true
-          cwd: "<%= yeoman.dist %>"
-          src: [
-            "*.html"
-            "views/{,*/}*.html"
-          ]
-          dest: "<%= yeoman.dist %>"
+          cwd: "ngapp_compiled/"
+          src: ["**/*.html"]
+          dest: "ngapp_compiled/"
         ]
 
-    
-    # Allow the use of non-minsafe AngularJS files. Automatically makes it
-    # minsafe compatible so Uglify does not destroy the ng references
-    # ngmin: {
-    #   controllers: {
-    #     src: ['test/src/controllers/one.js'],
-    #     dest: 'test/generated/controllers/one.js'
-    #   },
-    #   directives: {
-    #     expand: true,
-    #     cwd: 'test/src',
-    #     src: ['directives/**/*.js'],
-    #     dest: 'test/generated'
-    #   }
-    # },
+    ngmin: 
+      all: 
+        expand: true
+        cwd: "ngapp_compiled/"
+        src: "**/*.js"
+        dest: "ngapp_compiled/"
+
         
     # Run some tasks in parallel to speed up the build process
     concurrent:
       compile:
         tasks: ["coffee","jade","stylus"]
+      rework:
+        tasks:["autoprefixer","injectJson"]
+
     
     # Test settings
     karma:
@@ -239,8 +253,7 @@ module.exports = (grunt) ->
     grunt.task.run [
       "clean:compile"
       "bowerInstall"
-      "concurrent:compile"
-      "autoprefixer"
+      "concurrent"
       "watch"
     ]
 

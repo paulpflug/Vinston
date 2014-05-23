@@ -3,10 +3,7 @@ include /components/mixins/buttons.jade
 include /components/mixins/panel.jade
 include /components/mixins/form.jade
 link(rel='stylesheet', href='/root/appConfig/appConfig.css')
-#config(ng-controller="appConfigCtrl" 
-  ng-cloak
-  )
-  +spinner()
++heading("appConfig")
   +panel("Institute einrichten","active == 'institutes'","active != 'institutes'")
     table.table.table-hover
       thead
