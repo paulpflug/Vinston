@@ -122,15 +122,16 @@ getByPermission = (key, permission) ->
     if data.success
       success = true
       content = data.content
-      type = schema[key].type
-      if (type == "objects" or type == "object") and permission.length>0
-        if (type == "objects")
-          newContent = []
-          for contentItem in data.content
-            newContent.push(filterByPermission(contentItem,permission))
-        else
-          newContent = filterByPermission(data.content,permission)
-        content = newContent
+      if content
+        type = schema[key].type
+        if (type == "objects" or type == "object") and permission.length>0
+          if (type == "objects")
+            newContent = []
+            for contentItem in content
+              newContent.push(filterByPermission(contentItem,permission))
+          else
+            newContent = filterByPermission(content,permission)
+          content = newContent
   return {success:success,content:content}
 
 module.exports = {

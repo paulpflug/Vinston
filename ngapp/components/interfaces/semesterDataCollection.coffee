@@ -55,7 +55,7 @@ angular.module('interfaces')
       d = $q.defer()
       token = generate.token()
       self.count()
-      .then self.find 
+      .then angular.bind(self.find, self)
       .then (response) ->
         if response and response.success and response.content
           for data in response.content
