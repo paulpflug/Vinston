@@ -32,8 +32,9 @@ mod.service "clean", () ->
       for key,value of arg
         if angular.isString(value) and value != ""
           modifiedFilter[key] = { $regex: value }
-        if typeof value == "object" and value.length >0
-          modifiedFilter[key] = value
+        else
+          if not (angular.isUndefined(value) or value == null)
+            modifiedFilter[key] = value
       return modifiedFilter
 
 mod.factory "generate", () ->

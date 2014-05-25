@@ -19,6 +19,7 @@ angular.module('interfaces')
         connection:""
       }
       angular.extend(@options,options)
+      @filter = {}
       @inconsistent = false
       @status = ""
       @statusText = ""
@@ -39,12 +40,13 @@ angular.module('interfaces')
     updateQuery: (query) ->
       self = @ 
       query = {} if not query
-      query.find = {} if not query.find
-      query.find = clean.filter(query.find)    
+      if not query.find
+        query.find = _.cloneDeep(self.filter)     
       if not self.options.showDeleted
         query.find.deleted = false
       for k,v of self.options.filterBy
         query.find[k] = self.options.scope.$eval(v)
+      query.find = clean.filter(query.find)  
       return query
 
     connect: () ->
@@ -139,7 +141,9 @@ angular.module('interfaces')
           d.resolve())
         ,d.reject)
       return d.promise
-      
+    filterIsEmpty: () ->
+      self = @
+      return Object.keys(self.filter).length == 0
     insert: (item) ->
       d = $q.defer()
       self = @
@@ -298,7 +302,8 @@ angular.module('interfaces')
         self.data = arrayItem
         self.unchangedData = _.cloneDeep(arrayItem)
       else
-        if index
+        if not index
+          index = _.findIndex self.unchangedData, (item) -> item[self.options.idOfItem] == arrayItem[self.options.idOfItem]
           currentid = self.data[index][self.options.idOfItem]
           currentid2 = self.unchangedData[index][self.options.idOfItem]
           if arrayItem[self.options.idOfItem] == currentid and currentid == currentid2
@@ -306,15 +311,6 @@ angular.module('interfaces')
             self.unchangedData[index] = _.cloneDeep(arrayItem)
           else
             self.setInconsistent()
-        else
-          indexold = _.findIndex self.unchangedData, (item) -> item[self.options.idOfItem] == arrayItem[self.options.idOfItem]
-          if indexold >-1
-            indexnew = self.data.indexOf arrayItem
-            if indexold == indexnew  
-              self.unchangedData[indexold] = arrayItem
-              self.data[indexnew] = _.cloneDeep(arrayItem)
-            else
-              self.setInconsistent()
       $rootScope.$$phase || $rootScope.$apply()
 
 

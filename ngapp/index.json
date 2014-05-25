@@ -7,11 +7,10 @@
         "indexInstitutes.js",
         "indexLogin.js",
         "indexSemesters.js",
-        "header.js",
         "main.js"
       ],
       "concat" : [
-        "app.js"
+        "index.js"
       ]
     },
     "components": {

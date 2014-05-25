@@ -32,7 +32,9 @@ angular.module('interfaces')
       token = generate.token()
       if not self.busy
         self.busy = true
-        query = self.options.query if not query
+        query = {} if not query
+        query = self.updateQuery(query)
+        console.log query.find
         self.socket.emit "count", {content: query, token:token} 
         self.socket.once "count." + token, (response) ->
           self.busy = false
@@ -55,7 +57,7 @@ angular.module('interfaces')
       d = $q.defer()
       token = generate.token()
       self.count()
-      .then angular.bind(self.find, self)
+      .then angular.bind(self, self.find)
       .then (response) ->
         if response and response.success and response.content
           for data in response.content

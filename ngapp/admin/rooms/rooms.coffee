@@ -2,6 +2,7 @@ angular.module "AdminModule"
 .controller "roomsCtrl", ($scope, $filter,$q , $modal,session, semesterDataCollection, config) ->
   $scope.finished = false
   $scope.institutes = []
+  $scope.bookables = {"false":"Nicht buchbar","conditional":"Bedingt buchbar","true":"Buchbar"}
   $scope.rooms = new semesterDataCollection {
     scope: $scope.$new()
     connection: "'rooms.'+session.getActiveSemester().name"

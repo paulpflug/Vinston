@@ -26,6 +26,8 @@ vinstonApp.controller "appCtrl", ($scope ,$route,$q , session, auth, institute,s
       item = nav[params.group].functions[params.function]
       $scope.route = {pretty: item.pretty, icon: item.icon}
       $scope.$$phase || $scope.$digest()
+    else
+      $scope.route = false
   $q.all([session.loaded]).finally () -> 
     $scope.finished = true
     $scope.$$phase || $scope.$digest()
@@ -50,29 +52,26 @@ vinstonApp.config ($routeProvider) ->
       loadRoute: ($ocLazyLoad,$route,$q,$location,auth,toaster) ->
           d = $q.defer()
           params = $route.current.params
-          if nav and nav[params.group] and nav[params.group].functions and nav[params.group].functions[params.function]
-            g = "/"+params.group
-            f = "/"+params.function
-            auth.requirePermission(params.group)
-            .then (success)->
-              if success and modules[params.group] and modules[params.group].files
-                if modules[params.group].path
-                  files = []
-                  path = modules[params.group].path
-                  for file in modules[params.group].files
-                    files.push path + file
-                else
-                  files = modules[params.group].files
-                $ocLazyLoad.load 
-                  name: params.group.capitalize()+"Module",
-                  files: files
-                .then () -> d.resolve()
+          g = "/"+params.group
+          f = "/"+params.function
+          auth.requirePermission(params.group)
+          .then (success)->
+            if success and modules[params.group] and modules[params.group].files
+              if modules[params.group].path
+                files = []
+                path = modules[params.group].path
+                for file in modules[params.group].files
+                  files.push path + file
               else
-                d.reject()
-                window.history.back()
-                toaster.pop "error", "Unauthorisiert", "Sie haben nicht die nötige Berechtigung."
-          else
-            d.reject()
+                files = modules[params.group].files
+              $ocLazyLoad.load 
+                name: params.group.capitalize()+"Module",
+                files: files
+              .then () -> d.resolve()
+            else
+              d.reject()
+              window.history.back()
+              toaster.pop "error", "Unauthorisiert", "Sie haben nicht die nötige Berechtigung."
           return d.promise
   .otherwise redirectTo: "/"
 

@@ -60,7 +60,7 @@ html.no-js
         li
           a(href="#") 
             i.fa.fa-home.fa-lg
-        li.active
+        li.active(ng-if="route")
           span {{route.pretty}}
           i.fa.fa-fw(ng-if="route.icon" ng-class="route.icon")         
             

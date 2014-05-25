@@ -19,17 +19,15 @@ include /components/mixins/form.jade
             ng-change="rooms.updateFilter()"
             ng-disabled="rooms.disabled")
         th
-          +input("Kapazität")(
-            ng-model="rooms.filter.capacity"
-            ng-change="rooms.updateFilter()"
-            ng-disabled="rooms.disabled")
           +singleSelect("Institut")(
             ng-model="rooms.filter.institute"
             ng-change="rooms.updateFilter()"
             ng-options="inst.name as inst.name for inst in institutes"
             ng-disabled="rooms.disabled")
-
-            
+          +input("Kapazität")(
+            ng-model="rooms.filter.capacity"
+            ng-change="rooms.updateFilter()"
+            ng-disabled="rooms.disabled")         
         th
           +multiSelect("Zusätzliche Institute")(
             ng-model="rooms.filter.secInstitutes"
@@ -42,10 +40,26 @@ include /components/mixins/form.jade
             ng-options="inst.name as inst.name for inst in institutes"
             ng-disabled="rooms.disabled")
         th
-          +iconButton("Hinzufügen","fa-save").btn-primary(
+          +singleSelect("Buchbarkeit")(
+            ng-model="rooms.filter.bookable"
+            ng-change="rooms.updateFilter()"
+            ng-options="key as value for (key, value) in bookables"
+
+            )
+          +checkbox("Frei benutzbar, wenn nicht belegt")(
+            ng-model="rooms.filter.freeToUse"
+            ng-change="rooms.updateFilter()"
+            )
+        th
+          .btn-group
+            +iconButton("Hinzufügen","fa-save").btn-primary(
               ng-click="rooms.insert()"
               ng-disabled="!rooms.filter.name"
               )  
+            +iconButton("Rückgängig","fa-undo").btn-default(
+              ng-click="rooms.filter = {}"
+              ng-disabled="rooms.filterIsEmpty()"
+              )
         th
     tbody      
       tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict"
@@ -60,16 +74,15 @@ include /components/mixins/form.jade
             ng-change="rooms.setChanged(room)"
             ng-disabled="room.deleted")
         td
-          +input("Kapazität")(
-            ng-model="room.capacity"
-            ng-change="rooms.setChanged(room)"
-            ng-disabled="room.deleted")
           +singleSelect("Institut")(
             ng-model="room.institute"
             ng-change="rooms.setChanged(room)"
             ng-options="inst.name as inst.name for inst in institutes"
             ng-disabled="room.deleted")
-
+          +input("Kapazität")(
+            ng-model="room.capacity"
+            ng-change="rooms.setChanged(room)"
+            ng-disabled="room.deleted")
         td
           +multiSelect("Zusätzliche Institute")(
             ng-model="room.secInstitutes"
@@ -81,6 +94,17 @@ include /components/mixins/form.jade
             ng-change="rooms.setChanged(room)"
             ng-options="inst.name as inst.name for inst in institutes"
             ng-disabled="room.deleted")
+        td
+          +singleSelect("Buchbarkeit")(
+            ng-model="room.bookable"
+            ng-change="rooms.setChanged(room)"
+            ng-options="key as value for (key, value) in bookables"
+
+            )
+          +checkbox("Frei benutzbar, wenn nicht belegt")(
+            ng-model="room.freeToUse"
+            ng-change="rooms.setChanged(room)"
+            )
         td
           .btn-group(ng-show="room.changed && !room.deleted")
             +iconButton("Speichern","fa-save").btn-primary(

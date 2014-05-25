@@ -47,13 +47,10 @@ module.exports = (grunt) ->
         livereload: "<%= yeoman.livereload %>"
       coffee:
         files: ["ngapp/**/*.coffee"]
-        tasks: ['newer:coffee']
+        tasks: ['newer:coffee',"injectJson"]
       jade:
         files: ["ngapp/**/*.jade"]
         tasks: ['newer:jade']
-      injectJson:
-        files: ["ngapp_compiled/**/*.js"]
-        tasks: ["newer:injectJson"]
       stylus:
         files: ["ngapp/**/*.styl"]
         tasks: ['newer:stylus','autoprefixer']

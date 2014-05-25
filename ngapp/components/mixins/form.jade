@@ -41,7 +41,20 @@ mixin singleSelect(placeholder)
     option
 
 mixin multiSelect(placeholder)
-    select.multiple-chosen.form-control(
-      chosen
-      multiple
-      data-placeholder=placeholder)&attributes(attributes)
+  select.multiple-chosen.form-control(
+    chosen
+    multiple
+    data-placeholder=placeholder)&attributes(attributes)
+
+mixin radio(name,data)
+  each text, value in data
+    .radio
+      label
+        input(type="radio",name=name,value=value)&attributes(attributes)
+        span=text
+
+mixin checkbox(placeholder)
+  .checkbox
+    label
+      input(type="checkbox")&attributes(attributes)
+      span=placeholder
