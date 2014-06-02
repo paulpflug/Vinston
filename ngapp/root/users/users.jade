@@ -1,0 +1,83 @@
+include /components/mixins/buttons.jade
+include /components/mixins/panel.jade
+include /components/mixins/form.jade
+include /components/mixins/other.jade
++heading("users")
+  table.table.table-striped(
+    ng-show="finished"
+    infinite-scroll="users.next()"
+    infinite-scroll-distance=2
+    infinite-scroll-disabled="busy")
+    thead
+      tr 
+        th 
+          +input("Name")(
+            ng-model="users.filter.name"
+            ng-change="users.updateFilter()"
+            ng-disabled="users.disabled")
+        th
+          +inputPassword("Passwort")(
+            ng-model="users.filter.password"
+            ng-change="users.updateFilter()"
+            ng-disabled="users.disabled")
+        th
+          +singleSelect("Gruppe")(
+            ng-model="users.filter.group"
+            ng-change="users.updateFilter()"
+            ng-options="group for group in groups"
+            ng-disabled="users.disabled")
+        th
+          span Zuletzt eingeloggt:
+        th
+          .btn-group
+            +iconButton("Hinzufügen","fa-save").btn-primary(
+              ng-click="users.insert()"
+              ng-disabled="!users.filter.name"
+              )  
+            +iconButton("Rückgängig","fa-undo").btn-default(
+              ng-click="users.filter = {}"
+              ng-disabled="users.filterIsEmpty()"
+              )
+    tbody      
+      tr(ng-repeat="user in users.data | filter:users.filter:strict"
+        ng-class="{danger: user.deleted, warning: user.changed}")
+        td
+          +input("Name")(
+            ng-model="user.name"
+            ng-change="users.setChanged(user)"
+            ng-disabled="user.deleted")
+        td
+          +inputPassword("Neues Passwort")(
+            ng-model="user.password"
+            ng-change="users.setChanged(user)"
+            ng-disabled="user.deleted")
+        td
+          +singleSelect("Gruppe")(
+            ng-model="user.group"
+            ng-change="users.setChanged(user)"
+            ng-options="group for group in groups"
+            ng-disabled="user.deleted")
+        td
+          span {{user.lastLogin | timeago}}
+        td
+          .btn-group(ng-show="user.changed && !user.deleted")
+            +iconButton("Speichern","fa-save").btn-primary(
+              ng-click="users.save(user)"
+              ) 
+            +iconButton("Rückgängig","fa-undo").btn-default(
+              ng-click="users.unchange(user)"
+              )
+          .btn-group(ng-show="user.deleted")
+            +iconButton("Wiederherstellen","fa-undo").btn-default(
+              ng-click="users.undelete(user)"
+              ng-show="user.deleted"
+              ) 
+            +iconButton("Endgültig löschen","fa-trash-o").btn-danger(
+              ng-click="users.remove(user)"
+              ng-show="user.deleted"
+              ) 
+          +iconButton("Löschen","fa-trash-o").btn-warning(
+            ng-click="users.delete(user)"
+            ng-show="!user.changed && !user.deleted"
+            ) 
+  .busy(ng-show="users.busy") Lade Daten..

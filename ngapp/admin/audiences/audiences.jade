@@ -1,0 +1,113 @@
+include /components/mixins/other.jade
+include /components/mixins/buttons.jade
+include /components/mixins/panel.jade
+include /components/mixins/form.jade
++heading("audiences")
+  table.table.table-striped(
+    ng-show="finished"
+    infinite-scroll="audiences.next()"
+    infinite-scroll-distance=2
+    infinite-scroll-disabled="busy")
+    thead
+      tr 
+        th 
+          +input("Name")(
+            ng-model="audiences.filter.name"
+            ng-disabled="audiences.disabled")
+          +input("Abkürzung")(
+            ng-model="audiences.filter.abbr"
+            ng-disabled="audiences.disabled")
+        th
+          +singleSelect("Institut")(
+            ng-model="audiences.filter.institute"
+            ng-change="audiences.updateFilter()"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="audiences.disabled")
+          +multiSelect("Zusätzliche Institute")(
+            ng-model="audiences.filter.secInstitutes"
+            ng-change="audiences.updateFilter()"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="audiences.disabled")
+        th
+          +multiSelect("Fachsemester")(
+            ng-model="audiences.filter.terms"
+            ng-change="audiences.updateFilter()"
+            ng-options="term for term in terms"
+            ng-disabled="audiences.disabled")
+          +input("Spezialisierungen")(
+            ng-model="audiences.filter.differentiations"
+            ng-change="audiences.updateFilter()"
+            ng-disabled="audiences.disabled"
+            ng-list=",")
+        th
+          .btn-group
+            +iconButton("Hinzufügen","fa-save").btn-primary(
+              ng-click="audiences.insert()"
+              ng-disabled="!audiences.filter.name"
+              )  
+            +iconButton("Rückgängig","fa-undo").btn-default(
+              ng-click="audiences.filter = {}"
+              ng-disabled="audiences.filterIsEmpty()"
+              )
+        th
+    tbody      
+      tr(ng-repeat="audience in audiences.data | filter:audiences.filter:strict"
+        ng-class="{danger: audience.deleted, warning: audience.changed}")
+        td
+          +input("Name")(
+            ng-model="audience.name"
+            ng-change="audiences.setChanged(audience)"
+            ng-disabled="audience.deleted")
+          +input("Abkürzung")(
+            ng-model="audience.abbr"
+            ng-change="audiences.setChanged(audience)"
+            ng-disabled="audience.deleted")
+        td
+          +singleSelect("Institut")(
+            ng-model="audience.institute"
+            ng-change="audiences.setChanged(audience)"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="audience.deleted")
+          +multiSelect("Zusätzliche Institute")(
+            ng-model="audience.secInstitutes"
+            ng-change="audiences.setChanged(audience)"
+            ng-options="inst.name as inst.name for inst in institutes"
+            ng-disabled="audience.deleted")
+        td
+          +multiSelect("Fachsemester")(
+            ng-model="audience.terms"
+            ng-change="audiences.setChanged(audience)"
+            ng-options="term for term in terms"
+            ng-disabled="audiences.deleted")
+          +input("Spezialisierungen")(
+            ng-model="audience.differentiations"
+            ng-change="audiences.setChanged(audience)"
+            ng-disabled="audience.deleted"
+            ng-list=",")
+        td
+          .btn-group(ng-show="audience.changed && !audience.deleted")
+            +iconButton("Speichern","fa-save").btn-primary(
+              ng-click="audiences.save(audience)"
+              ) 
+            +iconButton("Rückgängig","fa-undo").btn-default(
+              ng-click="audiences.unchange(audience)"
+              )
+          .btn-group(ng-show="audience.deleted")
+            +iconButton("Wiederherstellen","fa-undo").btn-default(
+              ng-click="audiences.undelete(audience)"
+              ng-show="audience.deleted"
+              ) 
+            +iconButton("Endgültig löschen","fa-trash-o").btn-danger(
+              ng-click="audiences.remove(audience)"
+              ng-show="audience.deleted"
+              ) 
+          +iconButton("Löschen","fa-trash-o").btn-warning(
+            ng-click="audiences.delete(audience)"
+            ng-show="!audience.changed && !audience.deleted"
+            ) 
+        td
+          +iconButton("History","fa-list").btn-default(
+            ng-click="showHistory(audience)"
+            ng-show="audience.version>1"
+            ) 
+  .busy(ng-show="audiences.busy") Lade Daten..

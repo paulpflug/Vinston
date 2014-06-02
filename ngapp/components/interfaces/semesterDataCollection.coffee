@@ -16,48 +16,59 @@ angular.module('interfaces')
       @after = 0
       @totalCount = 0
       
-
-    reload: () ->
-      d = $q.defer()
-      console.log "reloading.."
+    sort: () ->
       self = @
-      self.data = []
-      self.unchangedData = []
-      self.next().then(d.resolve,d.reject)
+      d = $q.defer()
+      if self.after >= self.totalCount
+        super()
+      else
+        self.reload()
+      d.resolve()
       return d.promise
 
-    count: (query) ->
+    reload: () ->
+      self = @
+      d = $q.defer()
+      console.log "reloading.."
+      self.data = []
+      self.unchangedData = []
+      self.next(true).then(d.resolve,d.reject)
+      return d.promise
+
+    count: (query,update) ->
       self = @
       d = $q.defer()
       token = generate.token()
       if not self.busy
         self.busy = true
-        query = {} if not query
-        query = self.updateQuery(query)
-        console.log query.find
-        self.socket.emit "count", {content: query, token:token} 
-        self.socket.once "count." + token, (response) ->
-          self.busy = false
-          if response and response.success
-            self.totalCount = response.content
-            self.after = $filter("filter")(self.data,self.filter,"true").length
-            if(self.after < self.totalCount)
-              query.options = {skip:self.after,limit:20}
-              d.resolve(query)
+        if update or self.after < self.totalCount
+          query = {} if not query
+          query = self.updateQuery(query,false,true)
+          self.channel.emit "count", {content: query, token:token} 
+          self.channel.once "count." + token, (response) ->
+            self.busy = false
+            if response and response.success
+              self.totalCount = response.content
+              self.after = $filter("filter")(self.data,self.filter,"true").length
+              if(self.after < self.totalCount)
+                query.options = {skip:self.after,limit:20}
+                d.resolve(query)
+              else
+                d.reject()
             else
               d.reject()
-          else
-            d.reject()
+        else
+          d.reject()
       else
         d.reject()
       return d.promise
 
-    next: () ->
+    next: (update) ->
       self = @
       d = $q.defer()
       token = generate.token()
-      self.count()
-      .then angular.bind(self, self.find)
+      self.count(null, update)
+      .then angular.bind(self,self.find)
       .then (response) ->
         if response and response.success and response.content
           for data in response.content
@@ -66,12 +77,13 @@ angular.module('interfaces')
               self.setInconsistent()
               return
             else
-              self.addLocally data
+              self.addLocally data, true
           if self.inconsistent
             toaster.pop "success", "Inkonsistenz beseitigt", "Neu geladen - die Daten sind nun konsistent"
             self.inconsistent = false
           self.after += 20
       .finally () ->
+        self.busy = false
         d.resolve()
         $rootScope.$$phase || $rootScope.$apply()
       return d.promise
@@ -81,7 +93,7 @@ angular.module('interfaces')
       for k,v of self.filter
         if !v or (angular.isArray(v) and v.length == 0)
           delete self.filter[k]
-      self.next()
+      self.next(true)
       
     insert: (arrayItem) ->
       self = @
@@ -115,8 +127,8 @@ angular.module('interfaces')
       options = { sort: { version: -1}}
       collection = {find: find, options: options}
       token = generate.token()
-      self.socket.emit "history", {content: collection, token: token}
-      self.socket.once "history." + token, (response) ->
+      self.channel.emit "history", {content: collection, token: token}
+      self.channel.once "history." + token, (response) ->
         if response and response.success
           oldItem = arrayItem 
           newItem = _.cloneDeep(arrayItem)           

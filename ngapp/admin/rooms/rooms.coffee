@@ -1,5 +1,5 @@
 angular.module "AdminModule"
-.controller "roomsCtrl", ($scope, $filter,$q , $modal,session, semesterDataCollection, config) ->
+.controller "roomsCtrl", ($scope, $q , $modal,session, semesterDataCollection, config) ->
   $scope.finished = false
   $scope.institutes = []
   $scope.bookables = {"false":"Nicht buchbar","conditional":"Bedingt buchbar","true":"Buchbar"}
@@ -10,7 +10,9 @@ angular.module "AdminModule"
     nameOfDatabase: "Raum"
     useDiffs: true
     showDeleted: true
+    orderBy:"orderBy"
     }
+  $scope.orderBy= []
   $scope.showHistory = (room) -> 
     $scope.rooms.showHistory(room)
     modalInstance = $modal.open {

@@ -47,7 +47,11 @@ angular.module('interfaces')
   this.getActiveInstitute = () ->
     return activeInstitute
   this.setActiveSemester = (semester) ->
-    activeSemester = {name: semester.name, start: semester.start, end:semester.end}
+    activeSemester = {
+      name: semester.name 
+    }
+    for s in ["start","end","regstart","regend"]
+      activeSemester[s] = new Date(semester[s]).getTime()
     $cookieStore.put("activeSemester", semester)
     $rootScope.$$phase || $rootScope.$apply() 
   this.getActiveSemester= () ->

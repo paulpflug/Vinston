@@ -40,7 +40,12 @@ module.exports = (grunt) ->
       app: require("./bower.json").appPath or "ngapp"
       dist: "dist"
       livereload: 35729
-      
+    
+    env: 
+      dev:
+        NODE_ENV: "development"
+        DEBUG: "socket.io:* node server/server.coffee"
+
     # Watches files for changes and runs tasks based on the changed files
     watch:
       options:
@@ -248,6 +253,7 @@ module.exports = (grunt) ->
         "express:dist"
       ])
     grunt.task.run [
+      "env:dev"
       "clean:compile"
       "bowerInstall"
       "concurrent"

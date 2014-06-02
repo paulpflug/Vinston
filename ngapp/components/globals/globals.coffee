@@ -30,7 +30,7 @@ mod.service "clean", () ->
     filter: (arg) ->
       modifiedFilter = {}    
       for key,value of arg
-        if angular.isString(value) and value != ""
+        if angular.isString(+value) and value != ""
           modifiedFilter[key] = { $regex: value }
         else
           if not (angular.isUndefined(value) or value == null)
@@ -65,6 +65,39 @@ mod.factory "generate", () ->
         index = ids.indexOf(id)
       ids.push(id)
       return id
+
+    abbreviation: (str,length) ->
+      length = 3 if not length
+      return str if length > str.length
+      regexes = [/\s/,/[aeouäöü]/,/[a-z]/,/[AEOUÄÖÜ]/,/[A-Z]/]
+      chars = str.split("")
+      words = []
+      charcounts = {1:0}
+      i = 1
+      for c in chars
+        if c.search(regexes[0]) > -1
+          i++
+          words.push 0
+          charcounts[i] = 0
+        else
+          words.push i
+          charcounts[i]++
+      i = 0
+      while i < regexes.length
+        j = chars.length
+        while j > 0
+          j--
+          if chars[j].search(regexes[i]) > -1
+            if words[j] == 0 or charcounts[words[j]] > 1
+              charcounts[words[j]]--
+              chars.splice j,1
+              words.splice j,1
+              if chars.length == length
+                break
+        if chars.length == length
+          break
+        i++
+      return chars.join("")
 
 
 

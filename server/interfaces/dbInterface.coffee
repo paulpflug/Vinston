@@ -26,7 +26,10 @@ module.exports = {
     allowedFields = {}
     if not name
       name = Model.name
-    model = mongoose.model name, Model.schema
+    if Model.load
+      model = Model.load()
+    else
+      model = mongoose.model name, Model.schema
     if Model.history
       versionSchema = new Schema(
         parentId: String
@@ -37,18 +40,19 @@ module.exports = {
       )
       modelVersions = mongoose.model(name+"Versions", versionSchema)
     console.log "exposing "+name
-    io.of("/" + name).on "connection", (client) ->
+    io.of("/" + name).on "connection", (socket) ->
+      socket.emit "isReal"
       getAllowedFields = (mode) ->
         mode = "read" if not mode
-        if client.handshake.user and client.handshake.user.group
-          group =  client.handshake.user.group
+        if socket.client.auth.user and socket.client.auth.user.group
+          group =  socket.client.auth.user.group
         else
           group = "all"
         if allowedFields[group] and allowedFields[group][mode]
           return allowedFields[group][mode]
         fields = []
         for k,v of model.schema.tree
-          permission = client.handshake.inGroup v[mode]
+          permission = socket.client.auth.inGroup v[mode]
           if permission
             fields.push(k)
         if not allowedFields[group]
@@ -70,7 +74,7 @@ module.exports = {
         return real.join(" ")
       getRealFinds = (finds) ->        
         if Model.findRestriction
-          additionalFinds = client.handshake.getPermission Model.findRestriction
+          additionalFinds = socket.client.auth.getPermission Model.findRestriction
         if finds and _.isPlainObject(finds)
           allowed = getAllowedFields()
           for k,v of finds
@@ -93,7 +97,8 @@ module.exports = {
         fields = if query.fields and _.isString(query.fields) then query.fields else null
         options = if query.options and _.isPlainObject(query.options) then query.options else null
         return {find: find, fields: fields, options:options}
-      client.on "find", (request) ->
+      
+      socket.on "find", (request) ->
         if request and request.content and request.token
           query = cleanQuery(request.content)
           model.find query.find, query.fields, query.options, (err,data) ->
@@ -102,20 +107,21 @@ module.exports = {
             if not err
               success = true
               content = data
-            client.emit "find." + request.token, {success: success, content: content}
+            socket.emit "find." + request.token, {success: success, content: content}
 
-      client.on "count", (request) ->
+      socket.on "count", (request) ->
         if request and request.content and request.token
           query = cleanQuery(request.content)
           model.find(query.find, null, query.options).count (err,count) ->
             success = false
             content = undefined
+            console.log err
             if not err
               success = true
               content = count
-            client.emit "count." + request.token, {success: success, content: content}
+            socket.emit "count." + request.token, {success: success, content: content}
 
-      client.on "insert", (request) ->
+      socket.on "insert", (request) ->
         console.log request
         if request and request.content and _.isPlainObject(request.content) and request.token
           success = false
@@ -129,24 +135,24 @@ module.exports = {
             if not err
               success = true
               content = obj
-              client.broadcast.emit "inserted", obj._id
-            client.emit "insert." + request.token, {success: success, content: content}
+              socket.broadcast.emit "inserted", obj._id
+            socket.emit "insert." + request.token, {success: success, content: content}
 
       
-      client.on "update", (request) ->
+      socket.on "update", (request) ->
         if request and request.content and request.content._id  and _.isPlainObject(request.content) and request.token and request.changes
           success = false
           content = undefined
           item = request.content
+          id = item._id
           fields = getAllowedFields("write")
           for k,v of item
             if fields.indexOf(k) == -1
               delete item[k]
-          id = item._id
           ["_id","$$hashKey","__v"].forEach (string) -> delete item[string]
-          model.find {_id:id}, (err,oldItem) ->
-            if not err
-              if Model.history
+          if Model.history
+            model.find {_id:id}, (err,oldItem) ->
+              if not err              
                 oldversion = new modelVersions()
                 oldversion.parentId = id
                 oldversion.version = oldItem.version
@@ -155,29 +161,29 @@ module.exports = {
                 oldversion.updatedBy = oldItem.updatedBy
                 item.version++
                 item.updated = Date.now()
-                if client.handshake.user and client.handshake.user.name
-                  item.updatedBy = client.handshake.user.name
+                if socket.client.auth.user and socket.client.auth.user.name
+                  item.updatedBy = socket.client.auth.user.name
                 oldversion.save (err) ->
                   if not err
-                    model.update {_id:id}, item, {}, (err) -> 
+                    model.update {_id:id}, item, (err) -> 
                       if not err
                         success = true
                         item._id = id
                         content = item
-                        client.broadcast.emit("updated",id)  
-                      client.emit "update." + request.token, {success: success, content: content}
-              else
-                model.update {_id:id}, item, {}, (err) -> 
-                  if not err
-                    success = true
-                    item._id = id
-                    content = item
-                    client.broadcast.emit("updated",id)  
-                  client.emit "update." + request.token, {success: success, content: content}
+                        socket.broadcast.emit("updated",id)  
+                      socket.emit "update." + request.token, {success: success, content: content}
+          else
+            model.update {_id:id}, item, (err) -> 
+              if not err
+                success = true
+                item._id = id
+                content = item
+                socket.broadcast.emit("updated",id)  
+              socket.emit "update." + request.token, {success: success, content: content}
       if Model.remove
-        client.on "remove", (request) ->
+        socket.on "remove", (request) ->
           if request and request.content and request.token and request.content.id
-            if client.handshake.inGroup(Model.remove)
+            if socket.client.auth.inGroup(Model.remove)
               success = false
               content = undefined
               model.remove {_id:request.content.id}, (err) -> 
@@ -186,19 +192,19 @@ module.exports = {
                     modelVersions.remove {parentId:request.content.id}, (err) ->
                       if not err
                         success = true
-                        client.broadcast.emit "deleted", request.content.id
-                      client.emit "remove." + request.token, {success: success, content: content}
+                        socket.broadcast.emit "deleted", request.content.id
+                      socket.emit "remove." + request.token, {success: success, content: content}
                   else
                     success = true
-                    client.broadcast.emit "deleted", request.content.id
+                    socket.broadcast.emit "deleted", request.content.id
                 if not Model.History
-                  client.emit "remove." + request.token, {success: success, content: content}
+                  socket.emit "remove." + request.token, {success: success, content: content}
 
                     
       if Model.history
-        client.on "history", (request) ->
+        socket.on "history", (request) ->
           if request and request.content and request.token
-            if client.handshake.inGroup(Model.history)
+            if socket.client.auth.inGroup(Model.history)
               query = cleanQuerySimple(request.content)
               modelVersions.find query.find, query.fields, query.options, (err,data) ->
                 success = false
@@ -206,6 +212,6 @@ module.exports = {
                 if not err
                   success = true
                   content = data
-                client.emit "history." + request.token, {success: success, content: content}
+                socket.emit "history." + request.token, {success: success, content: content}
     return Q()
 }

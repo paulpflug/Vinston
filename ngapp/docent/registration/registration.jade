@@ -2,4 +2,33 @@ include /components/mixins/buttons.jade
 include /components/mixins/panel.jade
 include /components/mixins/form.jade
 include /components/mixins/other.jade
+link(rel='stylesheet', href='/docent/registration/registration.css')
 +heading("registration")
+  script(type="text/ng-template" id="nodes_renderer.html")
+    .tree-handle(ui-tree-handle)
+      span
+        +iconButton("Ausklappen","fa-caret-down").btn-default(
+          data-nodrag
+          ng-hide="!node.nodes || node.nodes.length==0 || !collapsed"
+          ng-click="toggle(this)")
+        +iconButton("Einklappen","fa-caret-up").btn-default(
+          data-nodrag
+          ng-hide="!node.nodes || node.nodes.length==0 || collapsed"
+          ng-click="toggle(this)")
+      span.name {{node.abbreviation}} - {{node.name}}
+    ol(ui-tree-nodes="" 
+      ng-model="node.nodes"
+      ng-show="!collapsed")
+      li(ng-repeat="node in node.nodes" 
+        ui-tree-node ng-include="'nodes_renderer.html'")
+    ul(ng-if="node.courses")
+      li(ng-repeat="course in node.courses")
+        span {{course.name}}
+  .tree(ui-tree
+    data-drag-enabled="false"
+    ng-show="finished"
+    ng-hide="!structure.data.nodes || structure.data.nodes.length==0")
+    ol(ui-tree-nodes="" 
+      ng-model="structure.data.nodes")
+      li(ng-repeat="node in structure.data.nodes" 
+        ui-tree-node ng-include="'nodes_renderer.html'")

@@ -5,9 +5,25 @@ SALT_WORK_FACTOR = 10
 Q = require "q"
 modelName = "users"
 userSchema = new Schema(
-  name: { type: String, required: true, index: { unique: true } }
-  password: { type: String, required: true }
-  group: { type: String, required: true }
+  name: 
+    type: String
+    required: true
+    index: 
+      unique: true
+    read: "root"
+    write: "root" 
+  password:
+    type: String
+    required: true
+    write: "root"
+  group: 
+    type: String
+    required: true
+    read: "root"
+    write: "root"
+  lastLogin:
+    type: Date
+    read: "root"
 )
 
 userSchema.pre "save", (next) -> 
@@ -53,7 +69,7 @@ checkForInstalled = (connection) ->
   return d.promise
 
 module.exports = {
-  modelName: modelName
+  name: modelName
   checkForInstalled: checkForInstalled
-  loadModel: loadModel
+  load: loadModel
 }

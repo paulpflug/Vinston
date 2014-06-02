@@ -69,7 +69,9 @@
       "path" : "admin/",
       "files" : [
         "admin.js",
+        "audiences/audiences.js",
         "docents/docents.js",
+        "roomBookings/roomBookings.js",
         "rooms/rooms.js",
         "structure/structure.js"
       ],
@@ -83,7 +85,8 @@
         "root.js",
         "appConfig/appConfig.js",
         "import/import.js",
-        "serverConfig/serverConfig.js"
+        "serverConfig/serverConfig.js",
+        "users/users.js"
       ],
       "concat" : [
         "root.js"
@@ -141,6 +144,10 @@
       "visible":"auth.inGroup('admin')",
       "path":"#/admin/",
       "functions":{
+        "roomBookings": {
+          "pretty":"Raumbuchungen",
+          "icon":"fa-list-alt"
+        },
         "rooms": {
           "pretty":"Räume",
           "icon":"fa-building-o"
@@ -153,10 +160,10 @@
           "pretty":"Struktur",
           "icon":"fa-sitemap"
         },
-        "roomBookings": {
-          "pretty":"Raumbuchungen",
-          "icon":"fa-list-alt"
-        }
+        "audiences":{
+          "pretty":"Zielgruppen",
+          "icon":"fa-users"
+        }        
       }
     },
     "root": {

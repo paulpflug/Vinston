@@ -1,11 +1,15 @@
 include /components/mixins/buttons.jade
-mixin input(placeholder)
-  
+mixin input(placeholder)  
   input.form-control(
     type="text"
     placeholder=placeholder
     )&attributes(attributes)
 
+mixin inputPassword(placeholder)  
+  input.form-control(
+    type="password"
+    placeholder=placeholder
+    )&attributes(attributes)
 
 mixin inputCheckbox(placeholder)
   .checkbox

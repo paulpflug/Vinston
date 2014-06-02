@@ -47,7 +47,7 @@ startup = () ->
   d = Q.defer()
   console.log "starting up"
   rootRoute = "/index.html"
-  io = require("socket.io").listen(server)
+  io = require("socket.io")(server)
   configInterface.expose(io, config)
   dbInterface.connectDB(config)
   .then () ->
@@ -57,13 +57,14 @@ startup = () ->
       if semesters.success and semesters.content
         for sem in config.get("semesters").content
           dbInterface.expose(io, Model,Model.name+"."+sem.name)
+    dbInterface.expose(io,users)
     authInterface.expose(io,users)
   .done () -> console.log "started up"; d.resolve()
   return d.promise
 setup = (configInstalled) ->
   d = Q.defer()
   console.log "starting install"
-  io = require("socket.io").listen(server)
+  io = require("socket.io")(server)
   rootRoute = "/install/install.html"
   installInterface = require "./interfaces/installInterface.coffee"
   installInterface.exposeInstallInterface io,config, users,configInstalled

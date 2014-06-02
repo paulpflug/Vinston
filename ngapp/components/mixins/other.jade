@@ -1,3 +1,4 @@
+include /components/mixins/buttons.jade
 mixin spinner()
   #startup.well(ng-hide="finished")
     i.fa.fa-spinner.fa-spin.fa-2x
@@ -5,4 +6,12 @@ mixin spinner()
 mixin heading(name)
   div(id=name,ng-controller=name+"Ctrl",ng-cloak)&attributes(attributes)
     +spinner()
+    block
+mixin sortmanager(model)
+  div(ng-controller="sortCtrl")
+    ul.breadcrumb(ui-sortable,ng-model=model,ng-if=model+".length > 0")
+      li(ng-repeat="name in "+model)
+        +sortButton(model,"name") 
+        span {{getPretty(name)}}        
+        +sortButtonRemove(model,"name") 
     block

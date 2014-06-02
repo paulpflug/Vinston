@@ -7,3 +7,23 @@ mixin iconButton(popover,fa)
     popover-append-to-body="true"
     )&attributes(attributes)
     span.fa.fa-lg(class=fa)
+mixin sortButton(model,name,type,pretty)
+  button.sortBtn(
+    popover="{{getPopover("+model+","+name+",'"+pretty+"')}}"
+    popover-trigger="mouseenter"
+    popover-animation="true"
+    popover-popup-delay="250"
+    popover-append-to-body="true"
+    ng-click="toggleSort("+model+","+name+")"
+    )&attributes(attributes)
+    span.fa(ng-class="getClass("+model+","+name+",'"+type+"')")
+mixin sortButtonRemove(model,name)
+  button.sortBtn(
+    popover="Entfernen"
+    popover-trigger="mouseenter"
+    popover-animation="true"
+    popover-popup-delay="250"
+    popover-append-to-body="true"
+    ng-click="remove("+model+","+name+")"
+    )&attributes(attributes)
+    span.fa.fa-times

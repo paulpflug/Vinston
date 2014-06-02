@@ -17,9 +17,12 @@ link(rel='stylesheet', href='/admin/structure/structure.css')
           ng-disabled="!node.nodes || node.nodes.length==0"
           ng-show="!collapsed"
           ng-click="toggle(this)")
-      +input("Name")(
-        ng-model="node.name"
+      +input("Abkürzung").abbr(
+        ng-model="node.abbreviation"
         ng-blur="save()")
+      +input("Name").name(
+        ng-model="node.name"
+        ng-blur="save(node)")
       span.btn-group
         +iconButton("Hinzufügen","fa-plus").btn-primary(
           data-nodrag

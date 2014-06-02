@@ -1,1 +1,3 @@
-angular.module "DocentModule", []
+angular.module "DocentModule", [
+  "ui.tree"
+]

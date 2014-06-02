@@ -1,6 +1,8 @@
 Schema = require("mongoose").Schema
 
 node = new Schema(
+  abbreviation:
+    type: String
   name: 
     type: String
   nodes: [node]

@@ -2,6 +2,10 @@ Schema = require("mongoose").Schema
 deleted = require "./../mongoosePlugins/deleted.coffee"
 versions = require "./../mongoosePlugins/versions.coffee"
 audienceSchema = new Schema(
+  abbr:
+    type: String
+    read: "all"
+    write: "admin"
   name:
     type: String
     read: "all"

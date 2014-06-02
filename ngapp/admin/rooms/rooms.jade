@@ -3,132 +3,137 @@ include /components/mixins/buttons.jade
 include /components/mixins/panel.jade
 include /components/mixins/form.jade
 +heading("rooms")
-  table.table.table-striped(
-    ng-show="finished"
-    infinite-scroll="rooms.next()"
-    infinite-scroll-distance=2
-    infinite-scroll-disabled="busy")
-    thead
-      tr 
-        th 
-          +input("Name")(
-            ng-model="rooms.filter.name"
-            ng-disabled="rooms.disabled")
-          +input("Zusätzlicher Name")(
-            ng-model="rooms.filter.advancedName"
-            ng-change="rooms.updateFilter()"
-            ng-disabled="rooms.disabled")
-        th
-          +singleSelect("Institut")(
-            ng-model="rooms.filter.institute"
-            ng-change="rooms.updateFilter()"
-            ng-options="inst.name as inst.name for inst in institutes"
-            ng-disabled="rooms.disabled")
-          +input("Kapazität")(
-            ng-model="rooms.filter.capacity"
-            ng-change="rooms.updateFilter()"
-            ng-disabled="rooms.disabled")         
-        th
-          +multiSelect("Zusätzliche Institute")(
-            ng-model="rooms.filter.secInstitutes"
-            ng-change="rooms.updateFilter()"
-            ng-options="inst.name as inst.name for inst in institutes"
-            ng-disabled="rooms.disabled")
-          +multiSelect("Zusätzliche Institute mit Vorbehalt")(
-            ng-model="rooms.filter.conditionalInstitutes"
-            ng-change="rooms.updateFilter()"
-            ng-options="inst.name as inst.name for inst in institutes"
-            ng-disabled="rooms.disabled")
-        th
-          +singleSelect("Buchbarkeit")(
-            ng-model="rooms.filter.bookable"
-            ng-change="rooms.updateFilter()"
-            ng-options="key as value for (key, value) in bookables"
+  +sortmanager("orderBy")
+    table.table.table-striped(
+      ng-show="finished"
+      infinite-scroll="rooms.next()"
+      infinite-scroll-distance=2
+      infinite-scroll-disabled="busy")
+      thead
+        tr 
+          th 
+            .sortInput
+              +input("Name")(
+                ng-model="rooms.filter.name"
+                ng-disabled="rooms.disabled")
+              +sortButton("orderBy","'name'","alpha","Name")
+            +input("Zusätzlicher Name")(
+              ng-model="rooms.filter.advancedName"
+              ng-change="rooms.updateFilter()"
+              ng-disabled="rooms.disabled")
+          th
+            +singleSelect("Institut")(
+              ng-model="rooms.filter.institute"
+              ng-change="rooms.updateFilter()"
+              ng-options="inst.name as inst.name for inst in institutes"
+              ng-disabled="rooms.disabled")
+            .sortInput
+              +input("Kapazität")(
+                ng-model="rooms.filter.capacity"
+                ng-change="rooms.updateFilter()"
+                ng-disabled="rooms.disabled")
+              +sortButton("orderBy","'capacity'","numeric","Kapazität")    
+          th
+            +multiSelect("Zusätzliche Institute")(
+              ng-model="rooms.filter.secInstitutes"
+              ng-change="rooms.updateFilter()"
+              ng-options="inst.name as inst.name for inst in institutes"
+              ng-disabled="rooms.disabled")
+            +multiSelect("Zusätzliche Institute mit Vorbehalt")(
+              ng-model="rooms.filter.conditionalInstitutes"
+              ng-change="rooms.updateFilter()"
+              ng-options="inst.name as inst.name for inst in institutes"
+              ng-disabled="rooms.disabled")
+          th
+            +singleSelect("Buchbarkeit")(
+              ng-model="rooms.filter.bookable"
+              ng-change="rooms.updateFilter()"
+              ng-options="key as value for (key, value) in bookables"
 
-            )
-          +checkbox("Frei benutzbar, wenn nicht belegt")(
-            ng-model="rooms.filter.freeToUse"
-            ng-change="rooms.updateFilter()"
-            )
-        th
-          .btn-group
-            +iconButton("Hinzufügen","fa-save").btn-primary(
-              ng-click="rooms.insert()"
-              ng-disabled="!rooms.filter.name"
-              )  
-            +iconButton("Rückgängig","fa-undo").btn-default(
-              ng-click="rooms.filter = {}"
-              ng-disabled="rooms.filterIsEmpty()"
               )
-        th
-    tbody      
-      tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict"
-        ng-class="{danger: room.deleted, warning: room.changed}")
-        td
-          +input("Name")(
-            ng-model="room.name"
-            ng-change="rooms.setChanged(room)"
-            ng-disabled="room.deleted")
-          +input("Zusätzlicher Name")(
-            ng-model="room.advancedName"
-            ng-change="rooms.setChanged(room)"
-            ng-disabled="room.deleted")
-        td
-          +singleSelect("Institut")(
-            ng-model="room.institute"
-            ng-change="rooms.setChanged(room)"
-            ng-options="inst.name as inst.name for inst in institutes"
-            ng-disabled="room.deleted")
-          +input("Kapazität")(
-            ng-model="room.capacity"
-            ng-change="rooms.setChanged(room)"
-            ng-disabled="room.deleted")
-        td
-          +multiSelect("Zusätzliche Institute")(
-            ng-model="room.secInstitutes"
-            ng-change="rooms.setChanged(room)"
-            ng-options="inst.name as inst.name for inst in institutes"
-            ng-disabled="room.deleted")
-          +multiSelect("Zusätzliche Institute mit Vorbehalt")(
-            ng-model="room.conditionalInstitutes"
-            ng-change="rooms.setChanged(room)"
-            ng-options="inst.name as inst.name for inst in institutes"
-            ng-disabled="room.deleted")
-        td
-          +singleSelect("Buchbarkeit")(
-            ng-model="room.bookable"
-            ng-change="rooms.setChanged(room)"
-            ng-options="key as value for (key, value) in bookables"
+            +checkbox("Frei benutzbar, wenn nicht belegt")(
+              ng-model="rooms.filter.freeToUse"
+              ng-change="rooms.updateFilter()"
+              )
+          th
+            .btn-group
+              +iconButton("Hinzufügen","fa-save").btn-primary(
+                ng-click="rooms.insert()"
+                ng-disabled="!rooms.filter.name"
+                )  
+              +iconButton("Rückgängig","fa-undo").btn-default(
+                ng-click="rooms.filter = {}"
+                ng-disabled="rooms.filterIsEmpty()"
+                )
+          th
+      tbody      
+        tr(ng-repeat="room in rooms.data | filter:rooms.filter:strict"
+          ng-class="{danger: room.deleted, warning: room.changed}")
+          td
+            +input("Name")(
+              ng-model="room.name"
+              ng-change="rooms.setChanged(room)"
+              ng-disabled="room.deleted")
+            +input("Zusätzlicher Name")(
+              ng-model="room.advancedName"
+              ng-change="rooms.setChanged(room)"
+              ng-disabled="room.deleted")
+          td
+            +singleSelect("Institut")(
+              ng-model="room.institute"
+              ng-change="rooms.setChanged(room)"
+              ng-options="inst.name as inst.name for inst in institutes"
+              ng-disabled="room.deleted")
+            +input("Kapazität")(
+              ng-model="room.capacity"
+              ng-change="rooms.setChanged(room)"
+              ng-disabled="room.deleted")
+          td
+            +multiSelect("Zusätzliche Institute")(
+              ng-model="room.secInstitutes"
+              ng-change="rooms.setChanged(room)"
+              ng-options="inst.name as inst.name for inst in institutes"
+              ng-disabled="room.deleted")
+            +multiSelect("Zusätzliche Institute mit Vorbehalt")(
+              ng-model="room.conditionalInstitutes"
+              ng-change="rooms.setChanged(room)"
+              ng-options="inst.name as inst.name for inst in institutes"
+              ng-disabled="room.deleted")
+          td
+            +singleSelect("Buchbarkeit")(
+              ng-model="room.bookable"
+              ng-change="rooms.setChanged(room)"
+              ng-options="key as value for (key, value) in bookables"
 
-            )
-          +checkbox("Frei benutzbar, wenn nicht belegt")(
-            ng-model="room.freeToUse"
-            ng-change="rooms.setChanged(room)"
-            )
-        td
-          .btn-group(ng-show="room.changed && !room.deleted")
-            +iconButton("Speichern","fa-save").btn-primary(
-              ng-click="rooms.save(room)"
-              ) 
-            +iconButton("Rückgängig","fa-undo").btn-default(
-              ng-click="rooms.unchange(room)"
               )
-          .btn-group(ng-show="room.deleted")
-            +iconButton("Wiederherstellen","fa-undo").btn-default(
-              ng-click="rooms.undelete(room)"
-              ng-show="room.deleted"
+            +checkbox("Frei benutzbar, wenn nicht belegt")(
+              ng-model="room.freeToUse"
+              ng-change="rooms.setChanged(room)"
+              )
+          td
+            .btn-group(ng-show="room.changed && !room.deleted")
+              +iconButton("Speichern","fa-save").btn-primary(
+                ng-click="rooms.save(room)"
+                ) 
+              +iconButton("Rückgängig","fa-undo").btn-default(
+                ng-click="rooms.unchange(room)"
+                )
+            .btn-group(ng-show="room.deleted")
+              +iconButton("Wiederherstellen","fa-undo").btn-default(
+                ng-click="rooms.undelete(room)"
+                ng-show="room.deleted"
+                ) 
+              +iconButton("Endgültig löschen","fa-trash-o").btn-danger(
+                ng-click="rooms.remove(room)"
+                ng-show="room.deleted"
+                ) 
+            +iconButton("Löschen","fa-trash-o").btn-warning(
+              ng-click="rooms.delete(room)"
+              ng-show="!room.changed && !room.deleted"
               ) 
-            +iconButton("Endgültig löschen","fa-trash-o").btn-danger(
-              ng-click="rooms.remove(room)"
-              ng-show="room.deleted"
+          td
+            +iconButton("History","fa-list").btn-default(
+              ng-click="showHistory(room)"
+              ng-show="room.version>1"
               ) 
-          +iconButton("Löschen","fa-trash-o").btn-warning(
-            ng-click="rooms.delete(room)"
-            ng-show="!room.changed && !room.deleted"
-            ) 
-        td
-          +iconButton("History","fa-list").btn-default(
-            ng-click="showHistory(room)"
-            ng-show="room.version>1"
-            ) 
-  .busy(ng-show="rooms.busy") Lade Daten..
+    .busy(ng-show="rooms.busy") Lade Daten..

@@ -1,5 +1,5 @@
 "use strict"
-window.socket = io.connect()
+window.socket = io()
 
 angular.module("installApp",[
   "globals"
@@ -14,8 +14,8 @@ angular.module("installApp",[
   "ui.bootstrap"
 ])
 .controller "appCtrl", ($scope, $modal, $interval, $timeout, $q ,generate,config) ->
-  socketConfig = io.connect("/installConfig")
-  socketUsers = io.connect("/installUsers") 
+  socketConfig = io("/installConfig")
+  socketUsers = io("/installUsers") 
   $scope.loaded = false  
   $scope.connectionTesting = false
   $scope.connectionTested = false

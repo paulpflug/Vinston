@@ -9,7 +9,7 @@ tokenExpiration = 1000*60*30 # 30 minutes
 module.exports = 
   expose : (io,users) ->
     d = Q.defer() 
-    userModel = users.loadModel()
+    userModel = users.load()
     findUser = (userName) ->
       d = Q.defer()
       userModel.findOne {name:userName}, (err, user) ->
@@ -18,51 +18,64 @@ module.exports =
         else
           d.resolve(user)
       return d.promise
-    
-    io.on "connection", (client) ->
-      client.handshake.getPermission = (permissions) ->
-        if client.handshake.user and client.handshake.user.group
-          group = client.handshake.user.group
+    setLoginDate = (userName) ->
+      d = Q.defer()
+      userModel.update {name: userName},{lastLogin: Date.now()},(err) ->
+        if err
+          d.reject(err)
         else
-          group = "all"
-        if util.isArray(permissions)
-          i = groups.indexOf(group)
-          while i < groups.length
-            j = permissions.indexOf(groups[i])
-            i++
-            if j > -1
-              permission = true
-              break
-        else
-          permission = permissions[group]
-          if not permission
+          d.resolve(userName)
+      return d.promise
+    io.use (socket,next) ->
+      socket.client.auth = {
+        getPermission: (permissions) ->
+          return false if not permissions
+          if socket.client.auth.user and socket.client.auth.user.group
+            group = socket.client.auth.user.group
+          else
+            group = "all"
+          if util.isArray(permissions)
             i = groups.indexOf(group)
-            while i>=0
-              i--
-              permission = permissions[groups[i]]
-              if permission
+            while i < groups.length
+              j = permissions.indexOf(groups[i])
+              i++
+              if j > -1
+                permission = true
                 break
-        permission = false if not permission
-        return permission
-      client.handshake.inGroup = (group) ->
-        if client.handshake.user and client.handshake.user.group
-          userGroup = client.handshake.user.group
-        else
-          userGroup = "all"
-        should = groups.indexOf(group)
-        actual = groups.indexOf(userGroup)
-        return (should <= actual)
-      client.on "disconnect", () ->
-        if client.handshake.token
-          token = client.handshake.token
+          else
+            permission = permissions[group]
+            if not permission
+              i = groups.indexOf(group)
+              while i>=0
+                i--
+                permission = permissions[groups[i]]
+                if permission
+                  break
+          permission = false if not permission
+          return permission
+        inGroup: (group) ->
+          return false if not group
+          if socket.client.auth.user and socket.client.auth.user.group
+            userGroup = socket.client.auth.user.group
+          else
+            userGroup = "all"
+          should = groups.indexOf(group)
+          actual = groups.indexOf(userGroup)
+          return (should <= actual)
+        }
+      next()
+    io.on "connection", (socket) ->
+      socket.on "disconnect", () ->
+        if socket.client.auth.token
+          token = socket.client.auth.token
           if tokenStore[token]
             timoutObj = setTimeout (() -> delete tokenStore[token]), tokenExpiration
             if tokenStore[token].removeTimeout
               tokenStore[token].removeTimeout() 
             tokenStore[token].removeTimeout = () ->
               clearTimeout(timoutObj)
-    io.of("/auth").on "connection", (client) ->
-      client.on "auth.byToken", (request) ->
+    io.of("/auth").on "connection", (socket) ->
+      socket.on "auth.byToken", (request) ->
         success = false
         content = false
         if request and request.token and request.content
@@ -75,10 +88,11 @@ module.exports =
             user = storedItem.user
             content = {name:user.name,group:user.group}
             success = true
-            client.handshake.user = user
-            client.handshake.token = token
-          client.emit "auth.byToken."+request.token, {success: success, content: content}
-      client.on "auth", (request) ->
+            setLoginDate user.name
+            socket.client.auth.user = user
+            socket.client.auth.token = token
+          socket.emit "auth.byToken."+request.token, {success: success, content: content}
+      socket.on "auth", (request) ->
         success = false
         content = false
         if request and request.content and request.content.name and request.content.password and request.token
@@ -97,13 +111,14 @@ module.exports =
                       clearTimeout(timoutObj)
                     timoutObj = setTimeout (() -> delete tokenStore[token]), tokenExpiration*50
                   tokenStore[token].resetLongTimeout()
-                  client.handshake.user = user
-                  client.handshake.token = token
-                  client.emit "auth."+request.token, {success: success, content: content}
+                  setLoginDate user.name
+                  socket.client.auth.user = user
+                  socket.client.auth.token = token
+                  socket.emit "auth."+request.token, {success: success, content: content}
               else
-                client.emit "auth."+request.token, {success: success, content: content}
+                socket.emit "auth."+request.token, {success: success, content: content}
           .catch () ->
-            client.emit "auth."+request.token, {success: success, content: content}
+            socket.emit "auth."+request.token, {success: success, content: content}
           
     d.resolve()
     return d.promise

@@ -24,7 +24,7 @@ roomBookingSchema = new Schema(
     read: "all"
     write: "admin"
   day: 
-    type: String
+    type: Date
     read: "all"
     write: "admin"
   time:

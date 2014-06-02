@@ -28,7 +28,9 @@ angular.module "AdminModule"
       if event.source.nodesScope != event.dest.nodesScope
         $scope.save()
   }
-  $scope.save = () -> 
+  $scope.save = (node) -> 
+    if node and node.name and not node.abbreviation
+      node.abbreviation = generate.abbreviation(node.name)
     $scope.structure.save().then () ->
       $scope.structure.reload()
   $scope.cleanTree = (tree) ->

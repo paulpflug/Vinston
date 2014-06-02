@@ -15,9 +15,10 @@ angular.module "AllModule"
     connection: "'courses.'+session.getActiveSemester().name"
     nameOfItem: "name"
     nameOfDatabase: "Veranstaltung"
-    query: {fiels: "lessons"}
+    query: {fields: "lessons"}
     }
   $q.all([$scope.rooms.loaded,$scope.courses])
   .finally () ->  
     $scope.finished = true 
-    console.log $scope.rooms.data
+    console.log $scope.rooms
+    console.log $scope.courses

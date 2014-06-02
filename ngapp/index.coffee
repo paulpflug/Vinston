@@ -1,4 +1,4 @@
-window.socket = io.connect()
+window.socket = io()
 
 vinstonApp = angular.module "vinstonApp", [
   "globals"
@@ -75,7 +75,7 @@ vinstonApp.config ($routeProvider) ->
           return d.promise
   .otherwise redirectTo: "/"
 
-vinstonApp.filter("isNot", () ->
+vinstonApp.filter "isNot", () ->
   return (array,filter,property) ->
     if filter
       result = []
@@ -91,7 +91,63 @@ vinstonApp.filter("isNot", () ->
       return result
     else
       return array
-)
+
+
+vinstonApp.filter "timeago", () -> 
+  return (time, local, raw) -> 
+    if (!time) 
+      return "nie"
+
+    if (!local) 
+      (local = Date.now())
+    
+
+    if (angular.isDate(time)) 
+      time = time.getTime();
+    else if (typeof time == "string") 
+      time = new Date(time).getTime();
+    
+
+    if (angular.isDate(local)) 
+      local = local.getTime();
+    else if (typeof local == "string") 
+      local = new Date(local).getTime();
+
+    if typeof time != 'number' || typeof local != 'number'
+      return
+    
+    offset = Math.abs((local - time) / 1000)
+    span = []
+    MINUTE = 60
+    HOUR = 3600
+    DAY = 86400
+    WEEK = 604800
+    MONTH = 2629744
+    YEAR = 31556926
+
+
+    if (offset <= MINUTE)              
+      span = [ '', if raw then 'jetzt' else 'weniger als einer Minute' ];
+    else if (offset < (MINUTE * 60))   
+      span = [ Math.round(Math.abs(offset / MINUTE)), 'min' ];
+    else if (offset < (HOUR * 24))     
+      span = [ Math.round(Math.abs(offset / HOUR)), 'h' ];
+    else if (offset < (DAY * 7))       
+      span = [ Math.round(Math.abs(offset / DAY)), 'd' ];
+    else if (offset < (WEEK * 52))     
+      span = [ Math.round(Math.abs(offset / WEEK)), 'w' ];
+    else if (offset < (YEAR * 10))     
+      span = [ Math.round(Math.abs(offset / YEAR)), 'Y' ];
+    else                               
+      span = [ '', 'sehr langer Zeit' ];
+    span = span.join(' ');
+    if (raw == true) 
+      return span;
+    return if time <= local then "vor " + span else "in " + span;
+
+
+
+
 
 vinstonApp.controller "isOpenCtrl", ($scope) ->
   $scope.isOpen = false
@@ -104,3 +160,60 @@ vinstonApp.controller "isOpenCtrl", ($scope) ->
     $event.stopPropagation();
     $scope.isOpen = !$scope.isOpen
 
+vinstonApp.controller "sortCtrl", ($scope) ->
+  types = {}
+  prettys = {}
+  getName = (name) ->
+    if name.charAt(0) == "-"
+      return name.slice(1)
+    else
+      return name
+  $scope.getPretty = (name) ->
+    name = getName(name)
+    return prettys[name]
+  
+  $scope.getPopover = (model,name,pretty) ->
+    name = getName(name)
+    prettys[name] = pretty
+    index = model.indexOf(name)
+    if index > -1
+      return "Abwärts sortieren"
+    else
+      return "Aufwärts sortieren"
+  
+  $scope.getClass = (model,name,type) ->
+    name = getName(name)
+    if type and type != "" and type != "undefined"
+      type = "-"+type 
+      types[name] = type
+    else
+      type = types[name]
+      if not type
+        type = ""
+    index = model.indexOf(name)
+    if index > -1
+      return "fa-sort"+type+"-desc"
+    else
+      return "fa-sort"+type+"-asc"
+      
+  $scope.toggleSort = (model,name) ->
+    name = getName(name)
+    index = model.indexOf(name)
+    if index > -1
+      model[index] = "-"+name
+    else
+      index = model.indexOf("-"+name)
+      if index > -1
+        model[index] = name
+      else
+        model.push name
+  $scope.remove = (model,name) ->
+    console.log name
+    
+    index = model.indexOf(name)
+    if index > -1
+      model= model.splice(index,1)
+    else
+      index = model.indexOf("-"+name)
+      if index > -1
+        model= model.splice(index,1)
